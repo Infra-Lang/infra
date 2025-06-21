@@ -1,0 +1,135 @@
+{
+  "name": "infra-lang-support",
+  "displayName": "Infra Language Support",
+  "description": "Comprehensive language support for Infra programming language with syntax highlighting, error detection, and debugging features",
+  "version": "1.0.0",
+  "publisher": "MdAshiquzzamanKhan",
+  "author": {
+    "name": "Md Ashiquzzaman Khan"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/infra-lang/infra",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/infra-lang/infra.git"
+  },
+  "bugs": {
+    "url": "https://github.com/infra-lang/infra/issues"
+  },
+  "keywords": [
+    "infra",
+    "programming-language",
+    "syntax-highlighting",
+    "language-support",
+    "interpreter"
+  ],
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#2B5CE6",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "^1.101.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "infra",
+        "aliases": [
+          "Infra",
+          "infra"
+        ],
+        "extensions": [
+          ".if",
+          ".infra"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/infra-file-light.svg",
+          "dark": "./icons/infra-file.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "infra",
+        "scopeName": "source.infra",
+        "path": "./syntaxes/infra.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "infra",
+        "path": "./snippets/infra.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "infra-lang-support.runFile",
+        "title": "Run Infra File",
+        "icon": "$(play)"
+      },
+      {
+        "command": "infra-lang-support.checkSyntax",
+        "title": "Check Syntax",
+        "icon": "$(check)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceLangId == infra",
+          "command": "infra-lang-support.runFile",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "when": "resourceLangId == infra",
+          "command": "infra-lang-support.runFile",
+          "group": "infra"
+        },
+        {
+          "when": "resourceLangId == infra",
+          "command": "infra-lang-support.checkSyntax",
+          "group": "infra"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.101.0",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.25.3",
+    "eslint": "^9.25.1",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  }
+}

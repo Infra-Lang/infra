@@ -1,0 +1,57 @@
+{
+  "name": "tree-sitter-infra",
+  "version": "1.0.0",
+  "description": "Tree-sitter grammar for the Infra programming language",
+  "main": "bindings/node",
+  "types": "bindings/node",
+  "scripts": {
+    "build": "tree-sitter generate && node-gyp build",
+    "test": "tree-sitter test",
+    "install": "node-gyp rebuild"
+  },
+  "keywords": [
+    "tree-sitter",
+    "infra",
+    "programming-language",
+    "parser",
+    "syntax-highlighting",
+    "github",
+    "linguist"
+  ],
+  "author": "Infra Language Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/username/tree-sitter-infra.git"
+  },
+  "files": [
+    "grammar.js",
+    "src",
+    "bindings",
+    "queries"
+  ],
+  "dependencies": {
+    "nan": "^2.22.2"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.20.8"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.infra",
+      "file-types": [
+        "if",
+        "infra"
+      ],
+      "highlights": "queries/highlights.scm",
+      "injections": "queries/injections.scm"
+    }
+  ],
+  "directories": {
+    "test": "test"
+  },
+  "bugs": {
+    "url": "https://github.com/username/tree-sitter-infra/issues"
+  },
+  "homepage": "https://github.com/username/tree-sitter-infra#readme"
+}

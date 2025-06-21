@@ -1,0 +1,6 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Blue document background, similar to TypeScript icon -->
+  <rect x="4" y="4" width="24" height="24" rx="4" fill="#3178c6"/>
+  <!-- Bold 'IF' text, centered -->
+  <text x="16" y="22" font-family="Segoe UI, Arial, sans-serif" font-size="16" fill="#fff" font-weight="bold" text-anchor="middle">IF</text>
+</svg>
