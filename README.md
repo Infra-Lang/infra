@@ -114,10 +114,12 @@ The binary will be at `target/release/infra`.
 
 ## 📖 Documentation
 
-- [Language Guide](docs/language-guide.md)
-- [Standard Library Reference](docs/stdlib.md)  
-- [VS Code Extension Guide](docs/vscode-setup.md)
-- [Contributing Guide](CONTRIBUTING.md)
+For detailed documentation, installation guides, and examples, see:
+- **[Complete Language Documentation](DOCUMENTATION.md)** - Comprehensive guide covering all language features
+- **[Quick Reference](QUICK_REFERENCE.md)** - Syntax cheat sheet and common patterns
+- **[Installation Guide](dist/INSTALL.md)** - Installation instructions for all platforms
+- **[Basic Examples](examples.if)** - Core language features and syntax
+- **[Advanced Examples](advanced_examples.if)** - Complex patterns and algorithms
 
 ## 🤝 Contributing
 
