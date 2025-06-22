@@ -4,10 +4,10 @@
 
 ### Variables & Types
 ```infra
-let name = "Alice"                    # String
-let age = 30                          # Number
+let name = "Alice"                    # String (Python-style comment)
+let age = 30                          // Number (C-style comment)
 let is_active = true                  # Boolean
-let scores = [95, 87, 92]            # Array
+let scores = [95, 87, 92]            // Array
 let person = {name: "Alice", age: 30} # Object
 
 # With type annotations

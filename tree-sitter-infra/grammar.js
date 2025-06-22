@@ -9,7 +9,10 @@ module.exports = grammar({
   rules: {
     source_file: $ => repeat($._item),
 
-    comment: $ => token(seq('#', /.*/)),
+    comment: $ => token(choice(
+      seq('#', /.*/),
+      seq('//', /.*/)
+    )),
 
     _item: $ => choice(
       $.function_declaration,

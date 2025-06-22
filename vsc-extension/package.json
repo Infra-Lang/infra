@@ -2,7 +2,7 @@
   "name": "infra-lang-support",
   "displayName": "Infra Language Support",
   "description": "Comprehensive language support for Infra programming language with syntax highlighting, error detection, and debugging features",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "MdAshiquzzamanKhan",
   "author": {
     "name": "Md Ashiquzzaman Khan"

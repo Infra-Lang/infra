@@ -71,8 +71,15 @@ print("Hello, World!")
 
 ### Comments
 ```infra
-# This is a single-line comment
-# Multi-line comments are achieved with multiple # symbols
+# This is a single-line comment (Python style)
+// This is also a single-line comment (C/JavaScript style)
+
+# Both comment styles work in Infra
+// You can use whichever style you prefer
+
+# Multi-line comments are achieved with multiple comment lines
+// Or multiple // lines like this
+// Each line needs its own comment marker
 ```
 
 ### Running Programs
@@ -287,14 +294,12 @@ for fruit in fruits {
 
 ### Basic Function Declaration
 ```infra
-function greet(name) {
+function greet(name):
     print("Hello, " + name + "!")
-}
 
 # Alternative syntax
-def greet(name) {
+def greet(name):
     print("Hello, " + name + "!")
-}
 
 # Call the function
 greet("Alice")
@@ -302,9 +307,8 @@ greet("Alice")
 
 ### Functions with Return Values
 ```infra
-function add(a, b) {
+function add(a, b):
     return a + b
-}
 
 let result = add(5, 3)
 print(result)  # 8
@@ -312,13 +316,11 @@ print(result)  # 8
 
 ### Functions with Type Annotations
 ```infra
-function multiply(a: number, b: number) -> number {
+function multiply(a: number, b: number) -> number:
     return a * b
-}
 
-function format_name(first: string, last: string) -> string {
+function format_name(first: string, last: string) -> string:
     return first + " " + last
-}
 ```
 
 ### Functions with Default Parameters

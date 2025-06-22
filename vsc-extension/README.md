@@ -25,7 +25,7 @@ A comprehensive VS Code extension providing language support for the Infra progr
 ### 🛠️ **Language Features**
 - Bracket matching and auto-closing
 - Smart indentation
-- Comment toggling with `#`
+- Comment toggling with `//` and `#` support
 - Code folding support
 
 ### 🎨 **Custom File Icons**

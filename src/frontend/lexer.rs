@@ -62,7 +62,18 @@ impl Lexer {
                 }
             },
             '*' => TokenType::Star,
-            '/' => TokenType::Slash,
+            '/' => {
+                if self.match_char('/') {
+                    // Handle // style comments
+                    while !self.is_at_end() && self.peek() != '\n' {
+                        self.advance();
+                    }
+                    // Return the next token after the comment
+                    return self.next_token();
+                } else {
+                    TokenType::Slash
+                }
+            },
             '%' => TokenType::Percent,
             '(' => TokenType::LeftParen,
             ')' => TokenType::RightParen,

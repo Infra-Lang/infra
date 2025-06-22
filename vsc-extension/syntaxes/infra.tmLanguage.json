@@ -40,6 +40,10 @@
         {
           "name": "comment.line.number-sign.infra",
           "match": "#.*$"
+        },
+        {
+          "name": "comment.line.double-slash.infra",
+          "match": "//.*$"
         }
       ]
     },
