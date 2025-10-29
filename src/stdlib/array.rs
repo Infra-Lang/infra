@@ -3,18 +3,17 @@ use crate::core::{Value, InfraError, Result};
 /// Get array length
 pub fn length(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
-        return Err(InfraError::ArgumentCountMismatch { 
-            expected: 1, 
-            found: args.len() 
+        return Err(InfraError::ArgumentCountMismatch {
+            expected: 1,
+            found: args.len()
         });
     }
-    
+
     match &args[0] {
         Value::Array(arr) => Ok(Value::Number(arr.len() as f64)),
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-        ,
             context: None,
         }),
     }
@@ -23,12 +22,12 @@ pub fn length(args: &[Value]) -> Result<Value> {
 /// Push element to array (returns new array)
 pub fn push(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
-        return Err(InfraError::ArgumentCountMismatch { 
-            expected: 2, 
-            found: args.len() 
+        return Err(InfraError::ArgumentCountMismatch {
+            expected: 2,
+            found: args.len()
         });
     }
-    
+
     match &args[0] {
         Value::Array(arr) => {
             let mut new_arr = arr.clone();
@@ -38,7 +37,6 @@ pub fn push(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-        ,
             context: None,
         }),
     }
@@ -47,12 +45,12 @@ pub fn push(args: &[Value]) -> Result<Value> {
 /// Pop last element from array (returns new array)
 pub fn pop(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
-        return Err(InfraError::ArgumentCountMismatch { 
-            expected: 1, 
-            found: args.len() 
+        return Err(InfraError::ArgumentCountMismatch {
+            expected: 1,
+            found: args.len()
         });
     }
-    
+
     match &args[0] {
         Value::Array(arr) => {
             if arr.is_empty() {
@@ -68,7 +66,6 @@ pub fn pop(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-        ,
             context: None,
         }),
     }
@@ -77,18 +74,18 @@ pub fn pop(args: &[Value]) -> Result<Value> {
 /// Sort array (only works with arrays of numbers or strings)
 pub fn sort(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
-        return Err(InfraError::ArgumentCountMismatch { 
-            expected: 1, 
-            found: args.len() 
+        return Err(InfraError::ArgumentCountMismatch {
+            expected: 1,
+            found: args.len()
         });
     }
-    
+
     match &args[0] {
         Value::Array(arr) => {
             if arr.is_empty() {
                 return Ok(Value::Array(vec![]));
             }
-            
+
             // Check if all elements are the same type
             let first_type = arr[0].type_name();
             if !arr.iter().all(|v| v.type_name() == first_type) {
@@ -96,9 +93,9 @@ pub fn sort(args: &[Value]) -> Result<Value> {
                     message: "Cannot sort array with mixed types".to_string(),
                 });
             }
-            
+
             let mut sorted_arr = arr.clone();
-            
+
             match &arr[0] {
                 Value::Number(_) => {
                     sorted_arr.sort_by(|a, b| {
@@ -124,13 +121,12 @@ pub fn sort(args: &[Value]) -> Result<Value> {
                     });
                 }
             }
-            
+
             Ok(Value::Array(sorted_arr))
         }
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-        ,
             context: None,
         }),
     }
@@ -139,12 +135,12 @@ pub fn sort(args: &[Value]) -> Result<Value> {
 /// Reverse array
 pub fn reverse(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
-        return Err(InfraError::ArgumentCountMismatch { 
-            expected: 1, 
-            found: args.len() 
+        return Err(InfraError::ArgumentCountMismatch {
+            expected: 1,
+            found: args.len()
         });
     }
-    
+
     match &args[0] {
         Value::Array(arr) => {
             let mut reversed_arr = arr.clone();
@@ -154,7 +150,6 @@ pub fn reverse(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-        ,
             context: None,
         }),
     }
@@ -163,12 +158,12 @@ pub fn reverse(args: &[Value]) -> Result<Value> {
 /// Join array elements into a string
 pub fn join(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
-        return Err(InfraError::ArgumentCountMismatch { 
-            expected: 2, 
-            found: args.len() 
+        return Err(InfraError::ArgumentCountMismatch {
+            expected: 2,
+            found: args.len()
         });
     }
-    
+
     match (&args[0], &args[1]) {
         (Value::Array(arr), Value::String(delimiter)) => {
             let string_parts: Result<Vec<String>> = arr
@@ -180,12 +175,11 @@ pub fn join(args: &[Value]) -> Result<Value> {
                     Value::Null => Ok("null".to_string()),
                     _ => Err(InfraError::RuntimeError {
                         message: format!("Cannot convert {} to string for joining", v.type_name()),
-                    ,
-            context: None,
-        }),
+                        context: None,
+                    }),
                 })
                 .collect();
-            
+
             match string_parts {
                 Ok(parts) => Ok(Value::String(parts.join(delimiter))),
                 Err(e) => Err(e),
@@ -194,7 +188,6 @@ pub fn join(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array and string".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-        ,
             context: None,
         }),
     }
@@ -206,12 +199,12 @@ pub fn join(args: &[Value]) -> Result<Value> {
 /// for when function values are implemented
 pub fn map(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
-        return Err(InfraError::ArgumentCountMismatch { 
-            expected: 2, 
-            found: args.len() 
+        return Err(InfraError::ArgumentCountMismatch {
+            expected: 2,
+            found: args.len()
         });
     }
-    
+
     // For now, we'll implement a basic transformation that doubles numbers
     // This is a placeholder until function values are implemented
     match &args[0] {
@@ -223,7 +216,7 @@ pub fn map(args: &[Value]) -> Result<Value> {
                     _ => Ok(v.clone()), // Keep other types unchanged
                 })
                 .collect();
-            
+
             match mapped {
                 Ok(result_arr) => Ok(Value::Array(result_arr)),
                 Err(e) => Err(e),
@@ -232,7 +225,6 @@ pub fn map(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-        ,
             context: None,
         }),
     }
@@ -242,12 +234,12 @@ pub fn map(args: &[Value]) -> Result<Value> {
 /// For now, filters numbers greater than the second argument
 pub fn filter(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
-        return Err(InfraError::ArgumentCountMismatch { 
-            expected: 2, 
-            found: args.len() 
+        return Err(InfraError::ArgumentCountMismatch {
+            expected: 2,
+            found: args.len()
         });
     }
-    
+
     match (&args[0], &args[1]) {
         (Value::Array(arr), Value::Number(threshold)) => {
             let filtered: Vec<Value> = arr
@@ -258,13 +250,12 @@ pub fn filter(args: &[Value]) -> Result<Value> {
                 })
                 .cloned()
                 .collect();
-            
+
             Ok(Value::Array(filtered))
         }
         _ => Err(InfraError::TypeError {
             expected: "array and number".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-        ,
             context: None,
         }),
     }
@@ -273,18 +264,18 @@ pub fn filter(args: &[Value]) -> Result<Value> {
 /// Reduce array to a single value (sum for numbers)
 pub fn reduce(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
-        return Err(InfraError::ArgumentCountMismatch { 
-            expected: 1, 
-            found: args.len() 
+        return Err(InfraError::ArgumentCountMismatch {
+            expected: 1,
+            found: args.len()
         });
     }
-    
+
     match &args[0] {
         Value::Array(arr) => {
             if arr.is_empty() {
                 return Ok(Value::Number(0.0));
             }
-            
+
             // For now, sum all numbers in the array
             let mut sum = 0.0;
             for item in arr {
@@ -292,18 +283,16 @@ pub fn reduce(args: &[Value]) -> Result<Value> {
                     Value::Number(n) => sum += n,
                     _ => return Err(InfraError::RuntimeError {
                         message: "reduce currently only supports arrays of numbers".to_string(),
-                    ,
-            context: None,
-        }),
+                        context: None,
+                    }),
                 }
             }
-            
+
             Ok(Value::Number(sum))
         }
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-        ,
             context: None,
         }),
     }
@@ -313,12 +302,12 @@ pub fn reduce(args: &[Value]) -> Result<Value> {
 /// For now, finds first number greater than the second argument
 pub fn find(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
-        return Err(InfraError::ArgumentCountMismatch { 
-            expected: 2, 
-            found: args.len() 
+        return Err(InfraError::ArgumentCountMismatch {
+            expected: 2,
+            found: args.len()
         });
     }
-    
+
     match (&args[0], &args[1]) {
         (Value::Array(arr), Value::Number(target)) => {
             for item in arr {
@@ -328,13 +317,12 @@ pub fn find(args: &[Value]) -> Result<Value> {
                     }
                 }
             }
-            
+
             Ok(Value::Null) // Return null if not found
         }
         _ => Err(InfraError::TypeError {
             expected: "array and number".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-        ,
             context: None,
         }),
     }
@@ -343,12 +331,12 @@ pub fn find(args: &[Value]) -> Result<Value> {
 /// Check if array contains a specific element
 pub fn contains(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
-        return Err(InfraError::ArgumentCountMismatch { 
-            expected: 2, 
-            found: args.len() 
+        return Err(InfraError::ArgumentCountMismatch {
+            expected: 2,
+            found: args.len()
         });
     }
-    
+
     match &args[0] {
         Value::Array(arr) => {
             let target = &args[1];
@@ -361,13 +349,12 @@ pub fn contains(args: &[Value]) -> Result<Value> {
                     _ => false,
                 }
             });
-            
+
             Ok(Value::Boolean(found))
         }
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-        ,
             context: None,
         }),
     }
@@ -376,12 +363,12 @@ pub fn contains(args: &[Value]) -> Result<Value> {
 /// Get the first element of an array
 pub fn first(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
-        return Err(InfraError::ArgumentCountMismatch { 
-            expected: 1, 
-            found: args.len() 
+        return Err(InfraError::ArgumentCountMismatch {
+            expected: 1,
+            found: args.len()
         });
     }
-    
+
     match &args[0] {
         Value::Array(arr) => {
             if arr.is_empty() {
@@ -393,7 +380,6 @@ pub fn first(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-        ,
             context: None,
         }),
     }
@@ -402,12 +388,12 @@ pub fn first(args: &[Value]) -> Result<Value> {
 /// Get the last element of an array
 pub fn last(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
-        return Err(InfraError::ArgumentCountMismatch { 
-            expected: 1, 
-            found: args.len() 
+        return Err(InfraError::ArgumentCountMismatch {
+            expected: 1,
+            found: args.len()
         });
     }
-    
+
     match &args[0] {
         Value::Array(arr) => {
             if arr.is_empty() {
