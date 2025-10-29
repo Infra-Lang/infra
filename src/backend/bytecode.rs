@@ -1,14 +1,17 @@
-use crate::core::{Value, ast::{Expr, Stmt, BinaryOp, UnaryOp, Program}};
+use crate::core::{
+    ast::{BinaryOp, Expr, Program, Stmt, UnaryOp},
+    Value,
+};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum OpCode {
     // Stack operations
-    LoadConst(usize),    // Load constant from constant pool
-    LoadVar(usize),      // Load variable from local variable table
-    StoreVar(usize),     // Store to local variable table
-    Pop,                 // Pop top value from stack
-    
+    LoadConst(usize), // Load constant from constant pool
+    LoadVar(usize),   // Load variable from local variable table
+    StoreVar(usize),  // Store to local variable table
+    Pop,              // Pop top value from stack
+
     // Arithmetic operations
     Add,
     Sub,
@@ -16,7 +19,7 @@ pub enum OpCode {
     Div,
     Mod,
     Negate,
-    
+
     // Comparison operations
     Equal,
     NotEqual,
@@ -24,31 +27,38 @@ pub enum OpCode {
     LessEqual,
     Greater,
     GreaterEqual,
-    
+
     // Logical operations
     And,
     Or,
     Not,
-    
+
     // Control flow
-    Jump(usize),         // Unconditional jump
-    JumpIfFalse(usize),  // Jump if top of stack is false
-    Call(usize),         // Call function with n arguments
-    Return,              // Return from function
-    
+    Jump(usize),        // Unconditional jump
+    JumpIfFalse(usize), // Jump if top of stack is false
+    Call(usize),        // Call function with n arguments
+    Return,             // Return from function
+
     // Built-in functions
     Print,
-    
+
     // Array operations
-    MakeArray(usize),    // Create array with n elements from stack
-    ArrayGet,            // Get array element (array, index on stack)
-    ArraySet,            // Set array element (array, index, value on stack)
-    
+    MakeArray(usize), // Create array with n elements from stack
+    ArrayGet,         // Get array element (array, index on stack)
+    ArraySet,         // Set array element (array, index, value on stack)
+
     // Object operations
-    MakeObject(usize),   // Create object with n key-value pairs from stack
-    ObjectGet,           // Get object property (object, key on stack)
-    ObjectSet,           // Set object property (object, key, value on stack)
-    
+    MakeObject(usize), // Create object with n key-value pairs from stack
+    ObjectGet,         // Get object property (object, key on stack)
+    ObjectSet,         // Set object property (object, key, value on stack)
+
+    // Async operations
+    CreatePromise,  // Create a new promise
+    ResolvePromise, // Resolve a promise with a value
+    RejectPromise,  // Reject a promise with an error
+    Await,          // Await a promise (suspends execution)
+    AsyncCall,      // Call an async function
+
     // Halt execution
     Halt,
 }
@@ -68,7 +78,7 @@ impl Chunk {
             lines: Vec::new(),
         }
     }
-    
+
     pub fn add_constant(&mut self, value: Value) -> usize {
         // Check if constant already exists to avoid duplicates
         for (i, constant) in self.constants.iter().enumerate() {
@@ -76,21 +86,21 @@ impl Chunk {
                 return i;
             }
         }
-        
+
         self.constants.push(value);
         self.constants.len() - 1
     }
-    
+
     pub fn emit(&mut self, op: OpCode, line: usize) {
         self.code.push(op);
         self.lines.push(line);
     }
-    
+
     pub fn emit_jump(&mut self, op: OpCode, line: usize) -> usize {
         self.emit(op, line);
         self.code.len() - 1
     }
-    
+
     pub fn patch_jump(&mut self, offset: usize) {
         let jump_target = self.code.len();
         if let Some(OpCode::Jump(_)) | Some(OpCode::JumpIfFalse(_)) = self.code.get_mut(offset) {
@@ -118,30 +128,30 @@ impl Compiler {
             local_count: 0,
         }
     }
-    
+
     pub fn compile(mut self, program: &Program) -> Result<Chunk, crate::core::error::InfraError> {
         for stmt in &program.statements {
             self.compile_stmt(stmt)?;
         }
-        
+
         // Emit halt instruction at the end
         self.chunk.emit(OpCode::Halt, 0);
-        
+
         Ok(self.chunk)
     }
-    
+
     fn compile_stmt(&mut self, stmt: &Stmt) -> Result<(), crate::core::error::InfraError> {
         match stmt {
             Stmt::Expression(expr) => {
                 self.compile_expr(expr)?;
                 self.chunk.emit(OpCode::Pop, 0); // Pop unused expression result
             }
-            
+
             Stmt::Print(expr) => {
                 self.compile_expr(expr)?;
                 self.chunk.emit(OpCode::Print, 0);
             }
-            
+
             Stmt::Let { name, value, .. } => {
                 self.compile_expr(value)?;
                 let local_index = self.local_count;
@@ -149,7 +159,7 @@ impl Compiler {
                 self.local_count += 1;
                 self.chunk.emit(OpCode::StoreVar(local_index), 0);
             }
-            
+
             Stmt::Assignment { target, value } => {
                 self.compile_expr(value)?;
                 match target {
@@ -164,18 +174,18 @@ impl Compiler {
                     }
                     _ => {
                         return Err(crate::core::error::InfraError::Runtime(
-                            "Complex assignment targets not yet supported in bytecode".to_string()
+                            "Complex assignment targets not yet supported in bytecode".to_string(),
                         ));
                     }
                 }
             }
-            
+
             Stmt::Block(statements) => {
                 for stmt in statements {
                     self.compile_stmt(stmt)?;
                 }
             }
-            
+
             Stmt::Return(expr) => {
                 if let Some(expr) = expr {
                     self.compile_expr(expr)?;
@@ -185,24 +195,44 @@ impl Compiler {
                 }
                 self.chunk.emit(OpCode::Return, 0);
             }
-            
+            Stmt::Function {
+                name, params, body, ..
+            } => {
+                // For now, compile function as a placeholder
+                // In a full implementation, we'd compile the function body separately
+                let func_name_const = self.chunk.add_constant(Value::String(name.clone()));
+                self.chunk.emit(OpCode::LoadConst(func_name_const), 0);
+                // Placeholder: push function as a value
+                // TODO: Implement proper function compilation
+            }
+            Stmt::AsyncFunction {
+                name, params, body, ..
+            } => {
+                // Compile async function similarly to regular function
+                let func_name_const = self.chunk.add_constant(Value::String(name.clone()));
+                self.chunk.emit(OpCode::LoadConst(func_name_const), 0);
+                // Placeholder: push async function as a value
+                // TODO: Implement proper async function compilation
+            }
+
             _ => {
-                return Err(crate::core::error::InfraError::Runtime(
-                    format!("Statement type not yet supported in bytecode: {:?}", stmt)
-                ));
+                return Err(crate::core::error::InfraError::Runtime(format!(
+                    "Statement type not yet supported in bytecode: {:?}",
+                    stmt
+                )));
             }
         }
-        
+
         Ok(())
     }
-    
+
     fn compile_expr(&mut self, expr: &Expr) -> Result<(), crate::core::error::InfraError> {
         match expr {
             Expr::Literal(value) => {
                 let const_index = self.chunk.add_constant(value.clone());
                 self.chunk.emit(OpCode::LoadConst(const_index), 0);
             }
-            
+
             Expr::Identifier(name) => {
                 if let Some(&local_index) = self.locals.get(name) {
                     self.chunk.emit(OpCode::LoadVar(local_index), 0);
@@ -212,11 +242,15 @@ impl Compiler {
                     });
                 }
             }
-            
-            Expr::Binary { left, operator, right } => {
+
+            Expr::Binary {
+                left,
+                operator,
+                right,
+            } => {
                 self.compile_expr(left)?;
                 self.compile_expr(right)?;
-                
+
                 match operator {
                     BinaryOp::Add => self.chunk.emit(OpCode::Add, 0),
                     BinaryOp::Subtract => self.chunk.emit(OpCode::Sub, 0),
@@ -233,23 +267,28 @@ impl Compiler {
                     BinaryOp::Or => self.chunk.emit(OpCode::Or, 0),
                 }
             }
-            
+
             Expr::Unary { operator, operand } => {
                 self.compile_expr(operand)?;
-                
+
                 match operator {
                     UnaryOp::Minus => self.chunk.emit(OpCode::Negate, 0),
                     UnaryOp::Not => self.chunk.emit(OpCode::Not, 0),
                 }
             }
-            
+
+            Expr::Await { expression } => {
+                self.compile_expr(expression)?;
+                self.chunk.emit(OpCode::Await, 0);
+            }
+
             Expr::Array(elements) => {
                 for element in elements {
                     self.compile_expr(element)?;
                 }
                 self.chunk.emit(OpCode::MakeArray(elements.len()), 0);
             }
-            
+
             Expr::Object(fields) => {
                 for (key, value) in fields {
                     let key_const = self.chunk.add_constant(Value::String(key.clone()));
@@ -258,14 +297,15 @@ impl Compiler {
                 }
                 self.chunk.emit(OpCode::MakeObject(fields.len()), 0);
             }
-            
+
             _ => {
-                return Err(crate::core::error::InfraError::Runtime(
-                    format!("Expression type not yet supported in bytecode: {:?}", expr)
-                ));
+                return Err(crate::core::error::InfraError::Runtime(format!(
+                    "Expression type not yet supported in bytecode: {:?}",
+                    expr
+                )));
             }
         }
-        
+
         Ok(())
     }
 }

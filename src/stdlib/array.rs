@@ -14,6 +14,8 @@ pub fn length(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
+        ,
+            context: None,
         }),
     }
 }
@@ -36,6 +38,8 @@ pub fn push(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
+        ,
+            context: None,
         }),
     }
 }
@@ -64,6 +68,8 @@ pub fn pop(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
+        ,
+            context: None,
         }),
     }
 }
@@ -124,6 +130,8 @@ pub fn sort(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
+        ,
+            context: None,
         }),
     }
 }
@@ -146,6 +154,8 @@ pub fn reverse(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
+        ,
+            context: None,
         }),
     }
 }
@@ -170,7 +180,9 @@ pub fn join(args: &[Value]) -> Result<Value> {
                     Value::Null => Ok("null".to_string()),
                     _ => Err(InfraError::RuntimeError {
                         message: format!("Cannot convert {} to string for joining", v.type_name()),
-                    }),
+                    ,
+            context: None,
+        }),
                 })
                 .collect();
             
@@ -182,6 +194,8 @@ pub fn join(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array and string".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
+        ,
+            context: None,
         }),
     }
 }
@@ -218,6 +232,8 @@ pub fn map(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
+        ,
+            context: None,
         }),
     }
 }
@@ -248,6 +264,8 @@ pub fn filter(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array and number".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
+        ,
+            context: None,
         }),
     }
 }
@@ -274,7 +292,9 @@ pub fn reduce(args: &[Value]) -> Result<Value> {
                     Value::Number(n) => sum += n,
                     _ => return Err(InfraError::RuntimeError {
                         message: "reduce currently only supports arrays of numbers".to_string(),
-                    }),
+                    ,
+            context: None,
+        }),
                 }
             }
             
@@ -283,6 +303,8 @@ pub fn reduce(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
+        ,
+            context: None,
         }),
     }
 }
@@ -312,6 +334,8 @@ pub fn find(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array and number".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
+        ,
+            context: None,
         }),
     }
 }
@@ -343,6 +367,8 @@ pub fn contains(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
+        ,
+            context: None,
         }),
     }
 }
@@ -367,6 +393,8 @@ pub fn first(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
+        ,
+            context: None,
         }),
     }
 }
@@ -391,6 +419,8 @@ pub fn last(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
+        ,
+            context: None,
         }),
     }
 }

@@ -1,3 +1,0 @@
-<!-- Placeholder for extension icon - you'll need to replace this with an actual 128x128 PNG file -->
-<!-- Create an icon.png file with the Infra language logo or a relevant programming icon -->
-<!-- This is just a text placeholder - the actual file should be a PNG image -->

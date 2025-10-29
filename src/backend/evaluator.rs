@@ -1,5 +1,5 @@
-use crate::core::{ast::*, Value, InfraError, Result};
 use crate::backend::Environment;
+use crate::core::{ast::*, InfraError, Result, Value};
 use crate::stdlib::StandardLibrary;
 
 pub struct Evaluator {
@@ -16,8 +16,8 @@ impl Evaluator {
     }
 
     pub fn with_environment(environment: Environment) -> Self {
-        Self { 
-            environment, 
+        Self {
+            environment,
             stdlib: StandardLibrary::new(),
         }
     }
@@ -25,10 +25,12 @@ impl Evaluator {
     pub fn evaluate_expression(&mut self, expr: &Expr) -> Result<Value> {
         match expr {
             Expr::Literal(value) => Ok(value.clone()),
-            Expr::Identifier(name) => {
-                self.environment.get(name)
-            }
-            Expr::Binary { left, operator, right } => {
+            Expr::Identifier(name) => self.environment.get(name),
+            Expr::Binary {
+                left,
+                operator,
+                right,
+            } => {
                 let left_val = self.evaluate_expression(left)?;
                 let right_val = self.evaluate_expression(right)?;
                 self.apply_binary_operator(operator, &left_val, &right_val)
@@ -43,17 +45,24 @@ impl Evaluator {
                     // Handle module function call
                     return self.call_module_function(module, function, args);
                 }
-                
+
                 let function = self.evaluate_expression(callee)?;
-                
+
                 match function {
-                    Value::Function { name, params, param_types, return_type, body, .. } => {
+                    Value::Function {
+                        name,
+                        params,
+                        param_types,
+                        return_type,
+                        body,
+                        ..
+                    } => {
                         // Evaluate arguments
                         let mut arg_values = Vec::new();
                         for arg in args {
                             arg_values.push(self.evaluate_expression(arg)?);
                         }
-                        
+
                         // Check argument count
                         if arg_values.len() != params.len() {
                             return Err(InfraError::ArgumentCountMismatch {
@@ -61,28 +70,35 @@ impl Evaluator {
                                 found: arg_values.len(),
                             });
                         }
-                        
-                        // Check parameter types
-                        for (i, (param_type, arg_value)) in param_types.iter().zip(arg_values.iter()).enumerate() {
+
+                        // Check parameter types with enhanced error messages
+                        for (i, (param_type, arg_value)) in
+                            param_types.iter().zip(arg_values.iter()).enumerate()
+                        {
                             if let Some(expected_type) = param_type {
                                 if !self.check_type_compatibility(arg_value, expected_type) {
                                     return Err(InfraError::TypeError {
-                                        expected: format!("parameter {} of type {}", params[i], self.type_to_string(expected_type)),
-                                        found: format!("{} ({})", arg_value.type_name(), arg_value)
+                                        expected: format!(
+                                            "parameter '{}' to be of type {}",
+                                            params[i],
+                                            self.type_to_string(expected_type)
+                                        ),
+                                        found: format!("{} ({})", arg_value.type_name(), arg_value),
+                                        context: Some(format!("function call to '{}'", name)),
                                     });
                                 }
                             }
                         }
-                        
+
                         // Create new environment for function
                         let old_env = self.environment.clone();
                         let mut function_env = Environment::with_parent(old_env.clone());
-                        
+
                         // Bind parameters
                         for (param, arg_value) in params.iter().zip(arg_values.iter()) {
                             function_env.define(param.clone(), arg_value.clone());
                         }
-                        
+
                         // Bind the function itself for recursion
                         let recursive_func = Value::Function {
                             name: name.clone(),
@@ -92,31 +108,41 @@ impl Evaluator {
                             body: body.clone(),
                         };
                         function_env.define(name.clone(), recursive_func);
-                        
+
                         // Execute function body with new environment
-                        let old_evaluator_env = std::mem::replace(&mut self.environment, function_env);
-                        
+                        let old_evaluator_env =
+                            std::mem::replace(&mut self.environment, function_env);
+
                         let result = match self.execute_function_body(&body) {
                             Ok(()) => Ok(Value::Null), // Function completed without return
                             Err(InfraError::Return(Some(value))) => {
-                                // Check return type
+                                // Check return type with enhanced error message
                                 if let Some(expected_return_type) = return_type {
-                                    if !self.check_type_compatibility(&value, &expected_return_type) {
+                                    if !self.check_type_compatibility(&value, &expected_return_type)
+                                    {
                                         return Err(InfraError::TypeError {
-                                            expected: format!("return type {}", self.type_to_string(&expected_return_type)),
-                                            found: format!("{} ({})", value.type_name(), value)
+                                            expected: format!(
+                                                "function '{}' to return type {}",
+                                                name,
+                                                self.type_to_string(&expected_return_type)
+                                            ),
+                                            found: format!("{} ({})", value.type_name(), value),
+                                            context: Some(format!(
+                                                "function '{}' return statement",
+                                                name
+                                            )),
                                         });
                                     }
                                 }
                                 Ok(value)
-                            },
+                            }
                             Err(InfraError::Return(None)) => Ok(Value::Null),
                             Err(e) => Err(e),
                         };
-                        
+
                         // Restore environment
                         self.environment = old_evaluator_env;
-                        
+
                         result
                     }
                     _ => Err(InfraError::TypeError {
@@ -135,7 +161,7 @@ impl Evaluator {
             Expr::Index { object, index } => {
                 let obj_value = self.evaluate_expression(object)?;
                 let index_value = self.evaluate_expression(index)?;
-                
+
                 match (&obj_value, &index_value) {
                     (Value::Array(arr), Value::Number(idx)) => {
                         let index = *idx as usize;
@@ -168,16 +194,14 @@ impl Evaluator {
             }
             Expr::Property { object, property } => {
                 let obj_value = self.evaluate_expression(object)?;
-                
+
                 match obj_value {
-                    Value::Object(obj) => {
-                        match obj.get(property) {
-                            Some(value) => Ok(value.clone()),
-                            None => Err(InfraError::PropertyNotFound {
-                                property: property.clone(),
-                            }),
-                        }
-                    }
+                    Value::Object(obj) => match obj.get(property) {
+                        Some(value) => Ok(value.clone()),
+                        None => Err(InfraError::PropertyNotFound {
+                            property: property.clone(),
+                        }),
+                    },
                     _ => Err(InfraError::TypeError {
                         expected: "object".to_string(),
                         found: obj_value.type_name().to_string(),
@@ -187,20 +211,28 @@ impl Evaluator {
             Expr::ModuleAccess { module, function } => {
                 // Module access should not be evaluated directly - it should only be used in function calls
                 Err(InfraError::RuntimeError {
-                    message: format!("Cannot access {}.{} directly - use as function call", module, function),
+                    message: format!(
+                        "Cannot access {}.{} directly - use as function call",
+                        module, function
+                    ),
                 })
             }
         }
     }
 
     /// Call a function from a standard library module
-    fn call_module_function(&mut self, module: &str, function: &str, args: &[Expr]) -> Result<Value> {
+    fn call_module_function(
+        &mut self,
+        module: &str,
+        function: &str,
+        args: &[Expr],
+    ) -> Result<Value> {
         // Evaluate arguments
         let mut arg_values = Vec::new();
         for arg in args {
             arg_values.push(self.evaluate_expression(arg)?);
         }
-        
+
         // Get the native function from stdlib
         if let Some(native_func) = self.stdlib.get_function(module, function) {
             native_func(&arg_values)
@@ -215,6 +247,20 @@ impl Evaluator {
         self.environment.define(name, value);
     }
 
+    pub fn define_variable_with_type(
+        &mut self,
+        name: String,
+        value: Value,
+        type_annotation: Option<Type>,
+    ) {
+        self.environment
+            .define_with_type(name, value, type_annotation);
+    }
+
+    pub fn get_variable_type(&self, name: &str) -> Result<Option<Type>> {
+        self.environment.get_type(name)
+    }
+
     pub fn get_environment(&self) -> &Environment {
         &self.environment
     }
@@ -225,12 +271,8 @@ impl Evaluator {
 
     fn apply_binary_operator(&self, op: &BinaryOp, left: &Value, right: &Value) -> Result<Value> {
         match (left, right) {
-            (Value::Number(l), Value::Number(r)) => {
-                self.apply_numeric_binary_operator(op, *l, *r)
-            }
-            (Value::String(l), Value::String(r)) => {
-                self.apply_string_binary_operator(op, l, r)
-            }
+            (Value::Number(l), Value::Number(r)) => self.apply_numeric_binary_operator(op, *l, *r),
+            (Value::String(l), Value::String(r)) => self.apply_string_binary_operator(op, l, r),
             (Value::Boolean(l), Value::Boolean(r)) => {
                 self.apply_boolean_binary_operator(op, *l, *r)
             }
@@ -280,7 +322,12 @@ impl Evaluator {
         }
     }
 
-    fn apply_string_binary_operator(&self, op: &BinaryOp, left: &str, right: &str) -> Result<Value> {
+    fn apply_string_binary_operator(
+        &self,
+        op: &BinaryOp,
+        left: &str,
+        right: &str,
+    ) -> Result<Value> {
         match op {
             BinaryOp::Add => Ok(Value::String(format!("{}{}", left, right))),
             BinaryOp::Equal => Ok(Value::Boolean(left == right)),
@@ -296,7 +343,12 @@ impl Evaluator {
         }
     }
 
-    fn apply_boolean_binary_operator(&self, op: &BinaryOp, left: bool, right: bool) -> Result<Value> {
+    fn apply_boolean_binary_operator(
+        &self,
+        op: &BinaryOp,
+        left: bool,
+        right: bool,
+    ) -> Result<Value> {
         match op {
             BinaryOp::Equal => Ok(Value::Boolean(left == right)),
             BinaryOp::NotEqual => Ok(Value::Boolean(left != right)),
@@ -365,7 +417,11 @@ impl Evaluator {
 
                 result
             }
-            Stmt::If { condition, then_stmt, else_stmt } => {
+            Stmt::If {
+                condition,
+                then_stmt,
+                else_stmt,
+            } => {
                 let condition_value = self.evaluate_expression(condition)?;
 
                 if condition_value.is_truthy() {
@@ -385,23 +441,31 @@ impl Evaluator {
                 }
                 Ok(())
             }
-            Stmt::For { var, start, end, body } => {
+            Stmt::For {
+                var,
+                start,
+                end,
+                body,
+            } => {
                 let start_val = self.evaluate_expression(start)?;
                 let end_val = self.evaluate_expression(end)?;
 
                 let (start_num, end_num) = match (start_val, end_val) {
                     (Value::Number(s), Value::Number(e)) => (s as i64, e as i64),
-                    _ => return Err(InfraError::TypeError {
-                        expected: "number".to_string(),
-                        found: "non-number in range".to_string(),
-                    }),
+                    _ => {
+                        return Err(InfraError::TypeError {
+                            expected: "number".to_string(),
+                            found: "non-number in range".to_string(),
+                        })
+                    }
                 };
 
                 // Save old variable value if it exists
                 let old_var_value = self.environment.get(var).ok();
 
                 for i in start_num..end_num {
-                    self.environment.define(var.clone(), Value::Number(i as f64));
+                    self.environment
+                        .define(var.clone(), Value::Number(i as f64));
                     self.execute_function_body(body)?;
                 }
 
@@ -420,7 +484,14 @@ impl Evaluator {
                 };
                 Err(InfraError::Return(return_value))
             }
-            Stmt::Function { name, params, param_types, return_type, body, .. } => {
+            Stmt::Function {
+                name,
+                params,
+                param_types,
+                return_type,
+                body,
+                ..
+            } => {
                 let function_value = Value::Function {
                     name: name.clone(),
                     params: params.clone(),
@@ -433,12 +504,30 @@ impl Evaluator {
             }
             Stmt::Assignment { target, value } => {
                 let new_value = self.evaluate_expression(value)?;
-                
+
                 match target {
                     AssignmentTarget::Identifier(name) => {
                         if self.environment.get(name).is_err() {
                             return Err(InfraError::UndefinedVariable { name: name.clone() });
                         }
+
+                        // Check type compatibility for assignment
+                        if let Ok(stored_type) = self.environment.get_type(name) {
+                            if let Some(expected_type) = stored_type {
+                                if !self.check_type_compatibility(&new_value, &expected_type) {
+                                    return Err(InfraError::TypeError {
+                                        expected: format!(
+                                            "variable '{}' to be of type {}",
+                                            name,
+                                            self.type_to_string(&expected_type)
+                                        ),
+                                        found: format!("{} ({})", new_value.type_name(), new_value),
+                                        context: Some(format!("assignment to variable '{}'", name)),
+                                    });
+                                }
+                            }
+                        }
+
                         self.environment.define(name.clone(), new_value);
                         Ok(())
                     }
@@ -448,15 +537,16 @@ impl Evaluator {
                             Value::Object(mut map) => {
                                 map.insert(property.clone(), new_value);
                                 let updated_obj = Value::Object(map);
-                                
+
                                 // We need to update the object in the environment
                                 // This is tricky because we need to find where the object is stored
                                 if let Expr::Identifier(obj_name) = object.as_ref() {
                                     self.environment.define(obj_name.clone(), updated_obj);
                                     Ok(())
                                 } else {
-                                    Err(InfraError::RuntimeError { 
-                                        message: "Cannot assign to property of complex expression".to_string() 
+                                    Err(InfraError::RuntimeError {
+                                        message: "Cannot assign to property of complex expression"
+                                            .to_string(),
                                     })
                                 }
                             }
@@ -469,26 +559,27 @@ impl Evaluator {
                     AssignmentTarget::Index { object, index } => {
                         let obj_val = self.evaluate_expression(object)?;
                         let index_val = self.evaluate_expression(index)?;
-                        
+
                         match (obj_val, index_val) {
                             (Value::Array(mut arr), Value::Number(idx)) => {
                                 let index = idx as usize;
                                 if index >= arr.len() {
-                                    return Err(InfraError::IndexOutOfBounds { 
-                                        index, 
-                                        length: arr.len() 
+                                    return Err(InfraError::IndexOutOfBounds {
+                                        index,
+                                        length: arr.len(),
                                     });
                                 }
                                 arr[index] = new_value;
                                 let updated_arr = Value::Array(arr);
-                                
+
                                 // Update array in environment
                                 if let Expr::Identifier(arr_name) = object.as_ref() {
                                     self.environment.define(arr_name.clone(), updated_arr);
                                     Ok(())
                                 } else {
-                                    Err(InfraError::RuntimeError { 
-                                        message: "Cannot assign to index of complex expression".to_string() 
+                                    Err(InfraError::RuntimeError {
+                                        message: "Cannot assign to index of complex expression"
+                                            .to_string(),
                                     })
                                 }
                             }
@@ -526,14 +617,26 @@ impl Evaluator {
     }
 
     // Enhanced type checking for function parameters and returns
-    fn check_function_parameter_types(&self, param_types: &[Option<Type>], arg_values: &[Value], param_names: &[String]) -> Result<()> {
+    fn check_function_parameter_types(
+        &self,
+        param_types: &[Option<Type>],
+        arg_values: &[Value],
+        param_names: &[String],
+    ) -> Result<()> {
         for (i, (param_type, arg_value)) in param_types.iter().zip(arg_values.iter()).enumerate() {
             if let Some(expected_type) = param_type {
                 if !self.check_type_compatibility(arg_value, expected_type) {
                     return Err(InfraError::TypeError {
-                        expected: format!("parameter '{}' of type {}", param_names[i], self.type_to_string(expected_type)),
-                        found: format!("{} (actual value: {})", arg_value.type_name(), 
-                               self.format_value_for_error(arg_value))
+                        expected: format!(
+                            "parameter '{}' of type {}",
+                            param_names[i],
+                            self.type_to_string(expected_type)
+                        ),
+                        found: format!(
+                            "{} (actual value: {})",
+                            arg_value.type_name(),
+                            self.format_value_for_error(arg_value)
+                        ),
                     });
                 }
             }
@@ -541,13 +644,25 @@ impl Evaluator {
         Ok(())
     }
 
-    fn check_function_return_type(&self, return_value: &Value, expected_return_type: &Option<Type>, function_name: &str) -> Result<()> {
+    fn check_function_return_type(
+        &self,
+        return_value: &Value,
+        expected_return_type: &Option<Type>,
+        function_name: &str,
+    ) -> Result<()> {
         if let Some(expected_type) = expected_return_type {
             if !self.check_type_compatibility(return_value, expected_type) {
                 return Err(InfraError::TypeError {
-                    expected: format!("function '{}' to return {}", function_name, self.type_to_string(expected_type)),
-                    found: format!("{} (actual value: {})", return_value.type_name(), 
-                           self.format_value_for_error(return_value))
+                    expected: format!(
+                        "function '{}' to return {}",
+                        function_name,
+                        self.type_to_string(expected_type)
+                    ),
+                    found: format!(
+                        "{} (actual value: {})",
+                        return_value.type_name(),
+                        self.format_value_for_error(return_value)
+                    ),
                 });
             }
         }
@@ -561,21 +676,39 @@ impl Evaluator {
             Value::Boolean(b) => b.to_string(),
             Value::Array(arr) => {
                 if arr.len() <= 3 {
-                    format!("[{}]", arr.iter().map(|v| self.format_value_for_error(v)).collect::<Vec<_>>().join(", "))
+                    format!(
+                        "[{}]",
+                        arr.iter()
+                            .map(|v| self.format_value_for_error(v))
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    )
                 } else {
-                    format!("[{}, ... {} more items]", 
-                           arr.iter().take(2).map(|v| self.format_value_for_error(v)).collect::<Vec<_>>().join(", "),
-                           arr.len() - 2)
+                    format!(
+                        "[{}, ... {} more items]",
+                        arr.iter()
+                            .take(2)
+                            .map(|v| self.format_value_for_error(v))
+                            .collect::<Vec<_>>()
+                            .join(", "),
+                        arr.len() - 2
+                    )
                 }
             }
             Value::Object(obj) => {
                 if obj.len() <= 2 {
-                    format!("{{{}}}", obj.iter().map(|(k, v)| format!("{}: {}", k, self.format_value_for_error(v))).collect::<Vec<_>>().join(", "))
+                    format!(
+                        "{{{}}}",
+                        obj.iter()
+                            .map(|(k, v)| format!("{}: {}", k, self.format_value_for_error(v)))
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    )
                 } else {
                     format!("{{... {} properties}}", obj.len())
                 }
             }
-            _ => format!("{}", value)
+            _ => format!("{}", value),
         }
     }
 
@@ -587,22 +720,30 @@ impl Evaluator {
             Type::Any => "any".to_string(),
             Type::Array(element_type) => format!("[{}]", self.type_to_string(element_type)),
             Type::Object(fields) => {
-                let field_strings: Vec<String> = fields.iter()
-                    .map(|(name, field_type)| format!("{}: {}", name, self.type_to_string(field_type)))
+                let field_strings: Vec<String> = fields
+                    .iter()
+                    .map(|(name, field_type)| {
+                        format!("{}: {}", name, self.type_to_string(field_type))
+                    })
                     .collect();
                 format!("{{{}}}", field_strings.join(", "))
             }
-            Type::Union(types) => {
-                types.iter()
-                    .map(|t| self.type_to_string(t))
-                    .collect::<Vec<_>>()
-                    .join(" | ")
-            }
-            Type::Function { params, return_type } => {
-                let param_strings: Vec<String> = params.iter()
-                    .map(|p| self.type_to_string(p))
-                    .collect();
-                format!("({}) -> {}", param_strings.join(", "), self.type_to_string(return_type))
+            Type::Union(types) => types
+                .iter()
+                .map(|t| self.type_to_string(t))
+                .collect::<Vec<_>>()
+                .join(" | "),
+            Type::Function {
+                params,
+                return_type,
+            } => {
+                let param_strings: Vec<String> =
+                    params.iter().map(|p| self.type_to_string(p)).collect();
+                format!(
+                    "({}) -> {}",
+                    param_strings.join(", "),
+                    self.type_to_string(return_type)
+                )
             }
             Type::Never => "never".to_string(),
         }
@@ -618,7 +759,11 @@ impl Evaluator {
             Value::Array(arr) => {
                 if arr.is_empty() {
                     // For empty arrays, we can't infer the element type
-                    Type::Array(Box::new(Type::Union(vec![Type::Number, Type::String, Type::Boolean])))
+                    Type::Array(Box::new(Type::Union(vec![
+                        Type::Number,
+                        Type::String,
+                        Type::Boolean,
+                    ])))
                 } else {
                     // Infer from first element (could be enhanced to check all elements)
                     let element_type = self.infer_value_type(&arr[0]);
@@ -632,14 +777,25 @@ impl Evaluator {
                 }
                 Type::Object(fields)
             }
-            Value::Function { param_types, return_type, .. } => {
-                let params: Vec<Type> = param_types.iter()
-                    .map(|opt_type| opt_type.clone().unwrap_or(Type::Union(vec![Type::Number, Type::String, Type::Boolean])))
+            Value::Function {
+                param_types,
+                return_type,
+                ..
+            } => {
+                let params: Vec<Type> = param_types
+                    .iter()
+                    .map(|opt_type| {
+                        opt_type.clone().unwrap_or(Type::Union(vec![
+                            Type::Number,
+                            Type::String,
+                            Type::Boolean,
+                        ]))
+                    })
                     .collect();
                 let ret_type = return_type.clone().unwrap_or(Type::Any);
                 Type::Function {
                     params,
-                    return_type: Box::new(ret_type)
+                    return_type: Box::new(ret_type),
                 }
             }
         }
@@ -658,17 +814,19 @@ impl Evaluator {
             (Type::String, Type::String) => true,
             (Type::Boolean, Type::Boolean) => true,
             (Type::Any, _) | (_, Type::Any) => true, // Any is compatible with everything
-            
+
             // Array compatibility
             (Type::Array(actual_elem), Type::Array(expected_elem)) => {
                 self.types_compatible(actual_elem, expected_elem)
             }
-            
+
             // Object compatibility (structural typing)
             (Type::Object(actual_fields), Type::Object(expected_fields)) => {
                 // Check that all expected fields are present and compatible
                 for (expected_key, expected_field_type) in expected_fields {
-                    if let Some((_, actual_field_type)) = actual_fields.iter().find(|(key, _)| key == expected_key) {
+                    if let Some((_, actual_field_type)) =
+                        actual_fields.iter().find(|(key, _)| key == expected_key)
+                    {
                         if !self.types_compatible(actual_field_type, expected_field_type) {
                             return false;
                         }
@@ -678,35 +836,50 @@ impl Evaluator {
                 }
                 true
             }
-            
+
             // Union type compatibility
             (actual_type, Type::Union(union_types)) => {
                 // Check if the actual type is compatible with any type in the union
-                union_types.iter().any(|union_type| self.types_compatible(actual_type, union_type))
+                union_types
+                    .iter()
+                    .any(|union_type| self.types_compatible(actual_type, union_type))
             }
-            
+
             (Type::Union(actual_types), expected_type) => {
                 // All types in the union must be compatible with expected
-                actual_types.iter().all(|actual_type| self.types_compatible(actual_type, expected_type))
+                actual_types
+                    .iter()
+                    .all(|actual_type| self.types_compatible(actual_type, expected_type))
             }
-            
+
             // Function compatibility
-            (Type::Function { params: actual_params, return_type: actual_return },
-             Type::Function { params: expected_params, return_type: expected_return }) => {
+            (
+                Type::Function {
+                    params: actual_params,
+                    return_type: actual_return,
+                },
+                Type::Function {
+                    params: expected_params,
+                    return_type: expected_return,
+                },
+            ) => {
                 // Check parameter compatibility (contravariant)
                 if actual_params.len() != expected_params.len() {
                     return false;
                 }
-                for (actual_param, expected_param) in actual_params.iter().zip(expected_params.iter()) {
-                    if !self.types_compatible(expected_param, actual_param) {  // Note: reversed for contravariance
+                for (actual_param, expected_param) in
+                    actual_params.iter().zip(expected_params.iter())
+                {
+                    if !self.types_compatible(expected_param, actual_param) {
+                        // Note: reversed for contravariance
                         return false;
                     }
                 }
                 // Check return type compatibility (covariant)
                 self.types_compatible(actual_return, expected_return)
             }
-            
-            _ => false
+
+            _ => false,
         }
     }
 
@@ -722,7 +895,11 @@ impl Evaluator {
                     Type::Any
                 }
             }
-            Expr::Binary { left, operator, right } => {
+            Expr::Binary {
+                left,
+                operator,
+                right,
+            } => {
                 let left_type = self.infer_expression_type(left);
                 let right_type = self.infer_expression_type(right);
                 self.infer_binary_operation_type(operator, &left_type, &right_type)
@@ -734,7 +911,8 @@ impl Evaluator {
             Expr::Call { callee, args } => {
                 // Try to infer return type from function signature
                 if let Expr::Identifier(func_name) = callee.as_ref() {
-                    if let Ok(Value::Function { return_type, .. }) = self.environment.get(func_name) {
+                    if let Ok(Value::Function { return_type, .. }) = self.environment.get(func_name)
+                    {
                         return return_type.unwrap_or(Type::Any);
                     }
                 }
@@ -756,9 +934,7 @@ impl Evaluator {
             Expr::Object(fields) => {
                 let typed_fields: Vec<(String, Type)> = fields
                     .iter()
-                    .map(|(key, value_expr)| {
-                        (key.clone(), self.infer_expression_type(value_expr))
-                    })
+                    .map(|(key, value_expr)| (key.clone(), self.infer_expression_type(value_expr)))
                     .collect();
                 Type::Object(typed_fields)
             }
@@ -783,14 +959,14 @@ impl Evaluator {
         if types.is_empty() {
             return Type::Any;
         }
-        
+
         let first_type = &types[0];
-        
+
         // If all types are the same, return that type
         if types.iter().all(|t| t == first_type) {
             return first_type.clone();
         }
-        
+
         // If types are different, create a union type
         let unique_types: Vec<Type> = types.iter().cloned().collect();
         if unique_types.len() == 1 {
@@ -803,7 +979,7 @@ impl Evaluator {
     /// Infer the result type of a binary operation
     fn infer_binary_operation_type(&self, operator: &BinaryOp, left: &Type, right: &Type) -> Type {
         use BinaryOp::*;
-        
+
         match operator {
             Add | Subtract | Multiply | Divide | Modulo => {
                 // Arithmetic operations
@@ -827,14 +1003,12 @@ impl Evaluator {
     /// Infer the result type of a unary operation
     fn infer_unary_operation_type(&self, operator: &UnaryOp, operand: &Type) -> Type {
         use UnaryOp::*;
-        
+
         match operator {
-            Minus => {
-                match operand {
-                    Type::Number => Type::Number,
-                    _ => Type::Any,
-                }
-            }
+            Minus => match operand {
+                Type::Number => Type::Number,
+                _ => Type::Any,
+            },
             Not => Type::Boolean, // Logical not always returns boolean
         }
     }
@@ -849,10 +1023,8 @@ impl Evaluator {
                 if elements.is_empty() {
                     Type::Array(Box::new(Type::Any))
                 } else {
-                    let element_types: Vec<Type> = elements
-                        .iter()
-                        .map(|v| self.value_to_type(v))
-                        .collect();
+                    let element_types: Vec<Type> =
+                        elements.iter().map(|v| self.value_to_type(v)).collect();
                     let common_type = self.find_common_type(&element_types);
                     Type::Array(Box::new(common_type))
                 }
@@ -864,14 +1036,17 @@ impl Evaluator {
                     .collect();
                 Type::Object(typed_fields)
             }
-            Value::Function { param_types, return_type, .. } => {
-                Type::Function {
-                    params: param_types.iter()
-                        .map(|opt_type| opt_type.clone().unwrap_or(Type::Any))
-                        .collect(),
-                    return_type: Box::new(return_type.clone().unwrap_or(Type::Any)),
-                }
-            }
+            Value::Function {
+                param_types,
+                return_type,
+                ..
+            } => Type::Function {
+                params: param_types
+                    .iter()
+                    .map(|opt_type| opt_type.clone().unwrap_or(Type::Any))
+                    .collect(),
+                return_type: Box::new(return_type.clone().unwrap_or(Type::Any)),
+            },
             Value::Null => Type::Any, // Null can be any type
         }
     }

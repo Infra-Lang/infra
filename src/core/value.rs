@@ -1,7 +1,7 @@
-use std::fmt;
-use std::collections::HashMap;
-use std::ops::{Add, Sub, Mul, Div, Rem};
 use crate::core::ast::Stmt;
+use std::collections::HashMap;
+use std::fmt;
+use std::ops::{Add, Div, Mul, Rem, Sub};
 
 #[derive(Debug, Clone)]
 pub enum Value {
@@ -14,9 +14,15 @@ pub enum Value {
     Function {
         name: String,
         params: Vec<String>,
-        param_types: Vec<Option<crate::core::ast::Type>>,  // Parameter types
-        return_type: Option<crate::core::ast::Type>,        // Return type
+        param_types: Vec<Option<crate::core::ast::Type>>, // Parameter types
+        return_type: Option<crate::core::ast::Type>,      // Return type
         body: Box<Stmt>,
+    },
+    Promise {
+        value: Option<Value>,
+        resolved: bool,
+        rejected: bool,
+        error: Option<String>,
     },
 }
 
@@ -29,7 +35,18 @@ impl PartialEq for Value {
             (Value::Null, Value::Null) => true,
             (Value::Array(a), Value::Array(b)) => a == b,
             (Value::Object(a), Value::Object(b)) => a == b,
-            (Value::Function { name: n1, params: p1, .. }, Value::Function { name: n2, params: p2, .. }) => {
+            (
+                Value::Function {
+                    name: n1,
+                    params: p1,
+                    ..
+                },
+                Value::Function {
+                    name: n2,
+                    params: p2,
+                    ..
+                },
+            ) => {
                 // Functions are equal if they have the same name and parameters
                 // We don't compare bodies for simplicity
                 n1 == n2 && p1 == p2
@@ -49,6 +66,7 @@ impl Value {
             Value::Array(_) => "array",
             Value::Object(_) => "object",
             Value::Function { .. } => "function",
+            Value::Promise { .. } => "promise",
         }
     }
 

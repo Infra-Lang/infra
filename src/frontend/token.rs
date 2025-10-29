@@ -6,7 +6,7 @@ pub enum TokenType {
     Number(f64),
     String(String),
     Identifier(String),
-    
+
     // Keywords
     Let,
     If,
@@ -21,20 +21,27 @@ pub enum TokenType {
     Print,
     Return,
     Function,
-    Def,  // Alternative function keyword
-    Try,   // New: try statement
-    Catch, // New: catch statement
-    Import, // New: import statement
-    Export, // New: export statement
-    From,   // New: from keyword for imports
-    As,     // New: as keyword for aliasing
-    
+    Def,     // Alternative function keyword
+    Try,     // New: try statement
+    Catch,   // New: catch statement
+    Import,  // New: import statement
+    Export,  // New: export statement
+    From,    // New: from keyword for imports
+    As,      // New: as keyword for aliasing
+    Async,   // New: async keyword
+    Await,   // New: await keyword
+    Class,   // New: class keyword
+    Extends, // New: extends keyword for inheritance
+    This,    // New: this keyword
+    Super,   // New: super keyword
+    Init,    // New: constructor keyword
+
     // Type annotations (NEW)
-    Arrow,     // -> for function return types
-    NumberType,   // number type keyword
-    StringType,   // string type keyword
-    BooleanType,  // boolean type keyword
-    
+    Arrow,       // -> for function return types
+    NumberType,  // number type keyword
+    StringType,  // string type keyword
+    BooleanType, // boolean type keyword
+
     // Operators
     Plus,
     Minus,
@@ -51,8 +58,8 @@ pub enum TokenType {
     GreaterEqual,
     And,
     Or,
-    Pipe,  // | for union types
-    
+    Pipe, // | for union types
+
     // Delimiters
     LeftParen,
     RightParen,
@@ -65,42 +72,75 @@ pub enum TokenType {
     Semicolon,
     Dot,
     Newline,
-    
+
     // End of file
     Eof,
 }
 
 impl TokenType {
     pub fn is_literal(&self) -> bool {
-        matches!(self, 
-            TokenType::Number(_) | 
-            TokenType::String(_) | 
-            TokenType::True | 
-            TokenType::False | 
-            TokenType::Null
+        matches!(
+            self,
+            TokenType::Number(_)
+                | TokenType::String(_)
+                | TokenType::True
+                | TokenType::False
+                | TokenType::Null
         )
     }
 
     pub fn is_keyword(&self) -> bool {
-        matches!(self,
-            TokenType::Let | TokenType::If | TokenType::Else |
-            TokenType::While | TokenType::For | TokenType::In |
-            TokenType::Range | TokenType::True | TokenType::False |
-            TokenType::Null | TokenType::Print | TokenType::Return |
-            TokenType::Function | TokenType::Def | TokenType::Try |
-            TokenType::Catch | TokenType::Import | TokenType::Export |
-            TokenType::From | TokenType::As
+        matches!(
+            self,
+            TokenType::Let
+                | TokenType::If
+                | TokenType::Else
+                | TokenType::While
+                | TokenType::For
+                | TokenType::In
+                | TokenType::Range
+                | TokenType::True
+                | TokenType::False
+                | TokenType::Null
+                | TokenType::Print
+                | TokenType::Return
+                | TokenType::Function
+                | TokenType::Def
+                | TokenType::Try
+                | TokenType::Catch
+                | TokenType::Import
+                | TokenType::Export
+                | TokenType::From
+                | TokenType::As
+                | TokenType::Async
+                | TokenType::Await
+                | TokenType::Class
+                | TokenType::Extends
+                | TokenType::This
+                | TokenType::Super
+                | TokenType::Init
         )
     }
 
     pub fn is_operator(&self) -> bool {
-        matches!(self,
-            TokenType::Plus | TokenType::Minus | TokenType::Star |
-            TokenType::Slash | TokenType::Percent | TokenType::Equal |
-            TokenType::EqualEqual | TokenType::Bang | TokenType::BangEqual |
-            TokenType::Less | TokenType::LessEqual | TokenType::Greater |
-            TokenType::GreaterEqual | TokenType::And | TokenType::Or |
-            TokenType::Pipe
+        matches!(
+            self,
+            TokenType::Plus
+                | TokenType::Minus
+                | TokenType::Star
+                | TokenType::Slash
+                | TokenType::Percent
+                | TokenType::Equal
+                | TokenType::EqualEqual
+                | TokenType::Bang
+                | TokenType::BangEqual
+                | TokenType::Less
+                | TokenType::LessEqual
+                | TokenType::Greater
+                | TokenType::GreaterEqual
+                | TokenType::And
+                | TokenType::Or
+                | TokenType::Pipe
         )
     }
 

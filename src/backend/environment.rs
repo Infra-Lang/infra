@@ -1,9 +1,10 @@
+use crate::core::{InfraError, Result, Type, Value};
 use std::collections::HashMap;
-use crate::core::{Value, InfraError, Result};
 
 #[derive(Debug, Clone)]
 pub struct Environment {
     variables: HashMap<String, Value>,
+    types: HashMap<String, Option<Type>>, // Store type annotations and inferred types
     pub parent: Option<Box<Environment>>,
 }
 
@@ -11,6 +12,7 @@ impl Environment {
     pub fn new() -> Self {
         Self {
             variables: HashMap::new(),
+            types: HashMap::new(),
             parent: None,
         }
     }
@@ -18,12 +20,32 @@ impl Environment {
     pub fn with_parent(parent: Environment) -> Self {
         Self {
             variables: HashMap::new(),
+            types: HashMap::new(),
             parent: Some(Box::new(parent)),
         }
     }
 
     pub fn define(&mut self, name: String, value: Value) {
-        self.variables.insert(name, value);
+        self.variables.insert(name.clone(), value);
+        // Infer and store type for untyped variables
+        if !self.types.contains_key(&name) {
+            self.types.insert(name, None); // None means no explicit type annotation
+        }
+    }
+
+    pub fn define_with_type(&mut self, name: String, value: Value, type_annotation: Option<Type>) {
+        self.variables.insert(name.clone(), value);
+        self.types.insert(name, type_annotation);
+    }
+
+    pub fn get_type(&self, name: &str) -> Result<Option<Type>> {
+        if let Some(t) = self.types.get(name) {
+            Ok(t.clone())
+        } else if let Some(parent) = &self.parent {
+            parent.get_type(name)
+        } else {
+            Ok(None)
+        }
     }
 
     pub fn get(&self, name: &str) -> Result<Value> {
@@ -51,9 +73,33 @@ impl Environment {
         }
     }
 
+    pub fn assign_with_type_check(
+        &mut self,
+        name: &str,
+        value: Value,
+        check_fn: &dyn Fn(&Value, Option<&Type>) -> Result<()>,
+    ) -> Result<()> {
+        if self.variables.contains_key(name) {
+            // Get stored type for type checking
+            let stored_type = self.types.get(name).cloned();
+
+            // Perform type checking if needed
+            check_fn(&value, stored_type.as_ref())?;
+
+            self.variables.insert(name.to_string(), value);
+            Ok(())
+        } else if let Some(parent) = &mut self.parent {
+            parent.assign_with_type_check(name, value, check_fn)
+        } else {
+            Err(InfraError::UndefinedVariable {
+                name: name.to_string(),
+            })
+        }
+    }
+
     pub fn contains(&self, name: &str) -> bool {
-        self.variables.contains_key(name) || 
-        self.parent.as_ref().map_or(false, |p| p.contains(name))
+        self.variables.contains_key(name)
+            || self.parent.as_ref().map_or(false, |p| p.contains(name))
     }
 
     pub fn clear(&mut self) {

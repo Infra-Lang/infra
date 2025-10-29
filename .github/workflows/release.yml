@@ -1,0 +1,442 @@
+name: Build and Release Installers
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 0.1.1)'
+        required: true
+        default: '0.1.1'
+      draft:
+        description: 'Create as draft'
+        required: false
+        default: false
+        type: boolean
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build-windows:
+    name: Build Windows Installers
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Cargo
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Install WiX Toolset
+      run: |
+        Invoke-WebRequest -Uri "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip" -OutFile "wix311-binaries.zip"
+        Expand-Archive -Path "wix311-binaries.zip" -DestinationPath "C:\Program Files (x86)\WiX Toolset v3.11\bin"
+        echo "C:\Program Files (x86)\WiX Toolset v3.11\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    - name: Install Inno Setup
+      run: |
+        choco install innosetup
+        echo "C:\Program Files (x86)\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    - name: Determine version
+      id: version
+      run: |
+        if ("${{ github.event_name }}" -eq "push") {
+          $version = "${{ github.ref_name }}" -replace "v", ""
+        } else {
+          $version = "${{ github.event.inputs.version }}"
+        }
+        echo "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8
+        echo "Version: $version"
+
+    - name: Update version files
+      run: |
+        $version = "${{ steps.version.outputs.version }}"
+
+        # Update Cargo.toml
+        (Get-Content Cargo.toml) -replace 'version = ".*"', "version = `"$version`"" | Set-Content Cargo.toml
+
+        # Update other version files
+        Get-ChildItem -Recurse -Include "*.rs","*.md" | ForEach-Object {
+          (Get-Content $_.FullName) -replace '0\.1\.\d+', $version | Set-Content $_.FullName
+        }
+
+    - name: Build Infra binary
+      run: |
+        cargo build --release
+
+    - name: Run tests
+      run: |
+        cargo test --release
+
+    - name: Build installers
+      run: |
+        .\build_installers.ps1 -All -Release -Version "${{ steps.version.outputs.version }}"
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: windows-installers
+        path: dist/*
+        retention-days: 30
+
+    - name: Create GitHub Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/*
+        draft: ${{ github.event.inputs.draft || false }}
+        prerelease: ${{ github.event.inputs.prerelease || false }}
+        generate_release_notes: true
+        body: |
+          # Infra v${{ steps.version.outputs.version }}
+
+          ## 🚀 Installation
+
+          ### Windows
+          - **MSI Installer**: Download `infra-setup-${{ steps.version.outputs.version }}.msi` for professional installation
+          - **Executable Installer**: Download `infra-setup-${{ steps.version.outputs.version }}.exe` for alternative installer
+          - **ZIP Package**: Download `infra-${{ steps.version.outputs.version }}-windows-x64.zip` for portable installation
+
+          ### Linux/macOS
+          - **Shell Installer**: Run `curl -fsSL https://install.infra-lang.dev | bash`
+          - **Linux Package**: Download `infra-${{ steps.version.outputs.version }}-linux-x64.tar.gz`
+          - **macOS Package**: Download `infra-${{ steps.version.outputs.version }}-macos-x64.zip`
+
+          ## ✨ What's New
+
+          This release includes:
+          - Professional MSI installer with modern UI
+          - Interactive configuration options
+          - Automatic PATH environment setup
+          - File type associations for `.if` files
+          - VS Code extension integration
+          - Development tools (LSP server, debugger)
+
+          ## 📋 Installation Options
+
+          The professional installer includes:
+          - ✅ Core Infra programming language
+          - ✅ Standard library and examples
+          - ✅ Documentation and quick reference
+          - ✅ Command-line shortcuts
+          - ✅ File association (`.if` files)
+          - ✅ PATH environment configuration
+          - ✅ VS Code extension (optional)
+          - ✅ Development tools (optional)
+
+          ## 🛠️ Development Tools
+
+          This release includes optional development tools:
+          - **LSP Server**: Language Server Protocol support for editors
+          - **Debugger**: Integrated debugging support
+          - **VS Code Extension**: Syntax highlighting, IntelliSense, and error diagnostics
+
+          ## 📖 Documentation
+
+          - Complete user manual
+          - Quick reference guide
+          - API documentation
+          - Example programs and tutorials
+
+          ## 🙏 Acknowledgments
+
+          Thank you to all contributors and users who helped make this release possible!
+
+          ## 📞 Support
+
+          - 📚 Documentation: https://infra-lang.dev/docs
+          - 💬 Community: https://github.com/infra-lang/infra/discussions
+          - 🐛 Issues: https://github.com/infra-lang/infra/issues
+
+          ---
+
+          **Quick Start:**
+          ```bash
+          # Check installation
+          infra --version
+
+          # Start interactive REPL
+          infra --repl
+
+          # Run a program
+          infra hello.if
+          ```
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-linux:
+    name: Build Linux Packages
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Cargo
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Determine version
+      id: version
+      run: |
+        if [[ "${{ github.event_name }}" == "push" ]]; then
+          version="${{ github.ref_name }}"
+          version="${version#v}"
+        else
+          version="${{ github.event.inputs.version }}"
+        fi
+        echo "version=$version" >> $GITHUB_OUTPUT
+        echo "Version: $version"
+
+    - name: Add Linux target
+      run: |
+        rustup target add x86_64-unknown-linux-gnu
+
+    - name: Build for Linux
+      run: |
+        cargo build --release --target x86_64-unknown-linux-gnu
+
+    - name: Create Linux package
+      run: |
+        mkdir -p dist/infra-${{ steps.version.outputs.version }}-linux-x64
+
+        # Copy binary
+        cp target/x86_64-unknown-linux-gnu/release/infra dist/infra-${{ steps.version.outputs.version }}-linux-x64/
+
+        # Copy standard library
+        if [ -d "stdlib" ]; then
+          cp -r stdlib dist/infra-${{ steps.version.outputs.version }}-linux-x64/
+        fi
+
+        # Copy examples
+        if [ -d "examples" ]; then
+          cp -r examples dist/infra-${{ steps.version.outputs.version }}-linux-x64/
+        fi
+
+        # Create installation script
+        cat > dist/infra-${{ steps.version.outputs.version }}-linux-x64/install.sh << 'EOF'
+        #!/bin/bash
+        echo "Installing Infra Programming Language..."
+
+        # Create installation directory
+        INSTALL_DIR="/usr/local/bin"
+        if [ "$EUID" -ne 0 ]; then
+          INSTALL_DIR="$HOME/.local/bin"
+          mkdir -p "$INSTALL_DIR"
+        fi
+
+        # Copy binary
+        cp infra "$INSTALL_DIR/"
+        chmod +x "$INSTALL_DIR/infra"
+
+        # Copy additional files
+        if [ -d "stdlib" ]; then
+          sudo mkdir -p /usr/local/lib/infra
+          sudo cp -r stdlib /usr/local/lib/infra/ 2>/dev/null || cp -r stdlib "$HOME/.local/lib/infra/"
+        fi
+
+        if [ -d "examples" ]; then
+          sudo mkdir -p /usr/local/share/infra/examples
+          sudo cp -r examples/* /usr/local/share/infra/examples/ 2>/dev/null || mkdir -p "$HOME/.local/share/infra/examples" && cp -r examples/* "$HOME/.local/share/infra/examples/"
+        fi
+
+        echo "Installation completed!"
+        echo "Run 'infra --version' to verify installation."
+        EOF
+
+        chmod +x dist/infra-${{ steps.version.outputs.version }}-linux-x64/install.sh
+
+        # Create tar.gz package
+        cd dist
+        tar -czf infra-${{ steps.version.outputs.version }}-linux-x64.tar.gz infra-${{ steps.version.outputs.version }}-linux-x64/
+
+        # Create DEB package (if dpkg-deb is available)
+        if command -v dpkg-deb &> /dev/null; then
+          mkdir -p infra-deb/DEBIAN
+          mkdir -p infra-deb/usr/bin
+          mkdir -p infra-deb/usr/share/doc/infra
+
+          cat > infra-deb/DEBIAN/control << EOF
+          Package: infra
+          Version: ${{ steps.version.outputs.version }}
+          Section: devel
+          Priority: optional
+          Architecture: amd64
+          Maintainer: Infra Language Team <team@infra-lang.dev>
+          Description: Infra Programming Language
+           Infra is a modern programming language with optional static typing,
+           built for simplicity and performance.
+          EOF
+
+          cp target/x86_64-unknown-linux-gnu/release/infra infra-deb/usr/bin/
+          cp README.md infra-deb/usr/share/doc/infra/
+
+          dpkg-deb --build infra-deb infra_${{ steps.version.outputs.version }}_amd64.deb
+        fi
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: linux-packages
+        path: dist/*
+        retention-days: 30
+
+  build-macos:
+    name: Build macOS Packages
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Cargo
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Determine version
+      id: version
+      run: |
+        if [[ "${{ github.event_name }}" == "push" ]]; then
+          version="${{ github.ref_name }}"
+          version="${version#v}"
+        else
+          version="${{ github.event.inputs.version }}"
+        fi
+        echo "version=$version" >> $GITHUB_OUTPUT
+        echo "Version: $version"
+
+    - name: Add macOS target
+      run: |
+        rustup target add x86_64-apple-darwin
+        rustup target add aarch64-apple-darwin
+
+    - name: Build for macOS (Intel)
+      run: |
+        cargo build --release --target x86_64-apple-darwin
+
+    - name: Build for macOS (Apple Silicon)
+      run: |
+        cargo build --release --target aarch64-apple-darwin
+
+    - name: Create universal binary
+      run: |
+        mkdir -p dist/infra-${{ steps.version.outputs.version }}-macos-universal
+
+        # Create universal binary
+        lipo -create \
+          target/x86_64-apple-darwin/release/infra \
+          target/aarch64-apple-darwin/release/infra \
+          -output dist/infra-${{ steps.version.outputs.version }}-macos-universal/infra
+
+        # Copy additional files
+        if [ -d "stdlib" ]; then
+          cp -r stdlib dist/infra-${{ steps.version.outputs.version }}-macos-universal/
+        fi
+
+        if [ -d "examples" ]; then
+          cp -r examples dist/infra-${{ steps.version.outputs.version }}-macos-universal/
+        fi
+
+        # Create installation script
+        cat > dist/infra-${{ steps.version.outputs.version }}-macos-universal/install.sh << 'EOF'
+        #!/bin/bash
+        echo "Installing Infra Programming Language..."
+
+        # Create installation directory
+        INSTALL_DIR="/usr/local/bin"
+        if [ "$EUID" -ne 0 ]; then
+          INSTALL_DIR="$HOME/.local/bin"
+          mkdir -p "$INSTALL_DIR"
+        fi
+
+        # Copy binary
+        cp infra "$INSTALL_DIR/"
+        chmod +x "$INSTALL_DIR/infra"
+
+        # Copy additional files
+        if [ -d "stdlib" ]; then
+          sudo mkdir -p /usr/local/lib/infra
+          sudo cp -r stdlib /usr/local/lib/infra/ 2>/dev/null || cp -r stdlib "$HOME/.local/lib/infra/"
+        fi
+
+        if [ -d "examples" ]; then
+          sudo mkdir -p /usr/local/share/infra/examples
+          sudo cp -r examples/* /usr/local/share/infra/examples/ 2>/dev/null || mkdir -p "$HOME/.local/share/infra/examples" && cp -r examples/* "$HOME/.local/share/infra/examples/"
+        fi
+
+        echo "Installation completed!"
+        echo "Run 'infra --version' to verify installation."
+        EOF
+
+        chmod +x dist/infra-${{ steps.version.outputs.version }}-macos-universal/install.sh
+
+        # Create ZIP package
+        cd dist
+        zip -r infra-${{ steps.version.outputs.version }}-macos-universal.zip infra-${{ steps.version.outputs.version }}-macos-universal/
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: macos-packages
+        path: dist/*
+        retention-days: 30
+
+  create-release:
+    name: Create Combined Release
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: artifacts/**/*
+        generate_release_notes: true
+        draft: false
+        prerelease: ${{ github.event.inputs.prerelease || false }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

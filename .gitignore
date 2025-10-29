@@ -1,4 +1,60 @@
-/target
-*.if
+# Build artifacts
+/target/
+Cargo.lock
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*.bak
+*.backup
+
+# Test output
+test_*.if
+*_test.if
+examples/
+
+# Documentation build
+docs/build/
+
+# Distribution artifacts
+dist/
+build/
+*.tar.gz
+*.zip
+*.exe
+*.deb
+*.rpm
+
+# Node.js (for any web tools)
 node_modules/
-**/node_modules/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache directories
+.cache/
+__pycache__/
+.pytest_cache/

@@ -16,12 +16,16 @@ pub fn read_file(args: &[Value]) -> Result<Value> {
                 Ok(content) => Ok(Value::String(content)),
                 Err(e) => Err(InfraError::IoError {
                     message: format!("Failed to read file '{}': {}", filename, e),
-                }),
+                ,
+            context: None,
+        }),
             }
         }
         _ => Err(InfraError::TypeError {
             expected: "string".to_string(),
             found: args[0].type_name().to_string(),
+        ,
+            context: None,
         }),
     }
 }
@@ -41,12 +45,16 @@ pub fn write_file(args: &[Value]) -> Result<Value> {
                 Ok(()) => Ok(Value::Null),
                 Err(e) => Err(InfraError::IoError {
                     message: format!("Failed to write file '{}': {}", filename, e),
-                }),
+                ,
+            context: None,
+        }),
             }
         }
         _ => Err(InfraError::TypeError {
             expected: "two strings".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
+        ,
+            context: None,
         }),
     }
 }
@@ -67,6 +75,8 @@ pub fn exists(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "string".to_string(),
             found: args[0].type_name().to_string(),
+        ,
+            context: None,
         }),
     }
 }
@@ -87,6 +97,8 @@ pub fn throw_exception(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "string".to_string(),
             found: args[0].type_name().to_string(),
+        ,
+            context: None,
         }),
     }
 }

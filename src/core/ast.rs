@@ -6,15 +6,15 @@ pub enum Type {
     Number,
     String,
     Boolean,
-    Array(Box<Type>),      // Array of specific type: [number]
+    Array(Box<Type>),            // Array of specific type: [number]
     Object(Vec<(String, Type)>), // Object with typed properties: {name: string, age: number}
     Function {
         params: Vec<Type>,
         return_type: Box<Type>,
     },
-    Union(Vec<Type>),      // Union types: number | string
-    Any,                   // For untyped variables
-    Never,                 // Bottom type (for functions that never return)
+    Union(Vec<Type>), // Union types: number | string
+    Any,              // For untyped variables
+    Never,            // Bottom type (for functions that never return)
 }
 
 #[derive(Debug, Clone)]
@@ -47,6 +47,17 @@ pub enum Expr {
     ModuleAccess {
         module: String,
         function: String,
+    },
+    Await {
+        expression: Box<Expr>,
+    },
+    This,
+    Super {
+        method: String,
+    },
+    New {
+        class: Box<Expr>,
+        args: Vec<Expr>,
     },
 }
 
@@ -91,11 +102,20 @@ pub enum UnaryOp {
 }
 
 #[derive(Debug, Clone)]
+pub struct MethodDecl {
+    pub name: String,
+    pub params: Vec<String>,
+    pub param_types: Vec<Option<Type>>, // Optional parameter types
+    pub return_type: Option<Type>,      // Optional return type
+    pub body: Box<Stmt>,
+}
+
+#[derive(Debug, Clone)]
 pub enum Stmt {
     Expression(Expr),
     Let {
         name: String,
-        type_annotation: Option<Type>,  // Optional type: let x: number = 42
+        type_annotation: Option<Type>, // Optional type: let x: number = 42
         value: Expr,
     },
     If {
@@ -119,9 +139,21 @@ pub enum Stmt {
     Function {
         name: String,
         params: Vec<String>,
-        param_types: Vec<Option<Type>>,  // Optional parameter types
-        return_type: Option<Type>,       // Optional return type
+        param_types: Vec<Option<Type>>, // Optional parameter types
+        return_type: Option<Type>,      // Optional return type
         body: Box<Stmt>,
+    },
+    AsyncFunction {
+        name: String,
+        params: Vec<String>,
+        param_types: Vec<Option<Type>>, // Optional parameter types
+        return_type: Option<Type>,      // Optional return type
+        body: Box<Stmt>,
+    },
+    Class {
+        name: String,
+        superclass: Option<String>,
+        methods: Vec<MethodDecl>,
     },
     Try {
         try_block: Box<Stmt>,
@@ -145,27 +177,21 @@ pub enum Stmt {
 #[derive(Debug, Clone)]
 pub enum AssignmentTarget {
     Identifier(String),
-    Property {
-        object: Box<Expr>,
-        property: String,
-    },
-    Index {
-        object: Box<Expr>,
-        index: Box<Expr>,
-    },
+    Property { object: Box<Expr>, property: String },
+    Index { object: Box<Expr>, index: Box<Expr> },
 }
 
 #[derive(Debug, Clone)]
 pub enum ImportItems {
-    All,                              // import * from "module"
-    Named(Vec<ImportItem>),           // import {a, b} from "module"
-    Default(String),                  // import module from "module"
+    All,                    // import * from "module"
+    Named(Vec<ImportItem>), // import {a, b} from "module"
+    Default(String),        // import module from "module"
 }
 
 #[derive(Debug, Clone)]
 pub struct ImportItem {
     pub name: String,
-    pub alias: Option<String>,       // import {a as b} from "module"
+    pub alias: Option<String>, // import {a as b} from "module"
 }
 
 #[derive(Debug, Clone)]
@@ -173,13 +199,13 @@ pub enum ExportItem {
     Function {
         name: String,
         params: Vec<String>,
-        param_types: Vec<Option<Type>>,  // Optional parameter types
-        return_type: Option<Type>,       // Optional return type
+        param_types: Vec<Option<Type>>, // Optional parameter types
+        return_type: Option<Type>,      // Optional return type
         body: Box<Stmt>,
     },
     Variable {
         name: String,
-        type_annotation: Option<Type>,   // Optional variable type
+        type_annotation: Option<Type>, // Optional variable type
         value: Expr,
     },
 }
