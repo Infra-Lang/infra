@@ -8,7 +8,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/infra-lang/infra)
-[![Version](https://img.shields.io/badge/version-0.1.1-blue.svg)](https://github.com/infra-lang/infra/releases)
+[![Version](https://img.shields.io/badge/version-0.1.7-blue.svg)](https://github.com/infra-lang/infra/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)]()
 
 [Quick Start](#-quick-start) • [Features](#-features) • [Documentation](#-documentation) • [Examples](#-examples) • [Contributing](#-contributing)
@@ -21,18 +21,39 @@
 
 ### Installation
 
-#### Option 1: Download Pre-built Binaries (Recommended)
+#### Option 1: Automated Installers (Recommended)
 
+**Fresh Installation:**
 ```bash
-# Windows PowerShell - Automated installer (recommended)
+# Windows PowerShell
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/infra-lang/infra/main/install.ps1" -OutFile "install.ps1"
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 .\install.ps1
 
-# macOS / Linux - Automated installer (recommended)
+# macOS / Linux
 curl -fsSL https://raw.githubusercontent.com/infra-lang/infra/main/install.sh | sh
+```
 
-# Or manual download:
+**Upgrade Existing Installation:**
+```bash
+# Windows PowerShell
+.\install.ps1 -Upgrade
+
+# macOS / Linux
+./install.sh --upgrade
+```
+
+**Help and Options:**
+```bash
+# Windows PowerShell
+.\install.ps1 -Help
+
+# macOS / Linux  
+./install.sh --help
+```
+
+**Manual Download:**
+```bash
 # Windows
 Invoke-WebRequest -Uri "https://github.com/infra-lang/infra/releases/latest/download/infra-windows.exe" -OutFile "infra.exe"
 
