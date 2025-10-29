@@ -23,8 +23,6 @@ pub fn sqrt(args: &[Value]) -> Result<Value> {
             expected: "number".to_string(),
             found: args[0].type_name().to_string(),
             context: None,
-        ,
-            context: None,
         }),
     }
 }
@@ -44,8 +42,6 @@ pub fn abs(args: &[Value]) -> Result<Value> {
             expected: "number".to_string(),
             found: args[0].type_name().to_string(),
             context: None,
-        ,
-            context: None,
         }),
     }
 }
@@ -64,7 +60,6 @@ pub fn max(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "two numbers".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-        ,
             context: None,
         }),
     }
@@ -84,7 +79,6 @@ pub fn min(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "two numbers".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-        ,
             context: None,
         }),
     }
@@ -104,7 +98,6 @@ pub fn pow(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "two numbers".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-        ,
             context: None,
         }),
     }
@@ -125,8 +118,6 @@ pub fn floor(args: &[Value]) -> Result<Value> {
             expected: "number".to_string(),
             found: args[0].type_name().to_string(),
             context: None,
-        ,
-            context: None,
         }),
     }
 }
@@ -146,8 +137,6 @@ pub fn ceil(args: &[Value]) -> Result<Value> {
             expected: "number".to_string(),
             found: args[0].type_name().to_string(),
             context: None,
-        ,
-            context: None,
         }),
     }
 }
@@ -166,8 +155,6 @@ pub fn round(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "number".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
-        ,
             context: None,
         }),
     }

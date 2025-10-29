@@ -1,11 +1,11 @@
-use crate::core::{Value, InfraError, Result};
+use crate::core::{InfraError, Result, Value};
 
 /// Get array length
 pub fn length(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
-            found: args.len()
+            found: args.len(),
         });
     }
 
@@ -24,7 +24,7 @@ pub fn push(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
-            found: args.len()
+            found: args.len(),
         });
     }
 
@@ -47,7 +47,7 @@ pub fn pop(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
-            found: args.len()
+            found: args.len(),
         });
     }
 
@@ -76,7 +76,7 @@ pub fn sort(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
-            found: args.len()
+            found: args.len(),
         });
     }
 
@@ -137,7 +137,7 @@ pub fn reverse(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
-            found: args.len()
+            found: args.len(),
         });
     }
 
@@ -160,7 +160,7 @@ pub fn join(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
-            found: args.len()
+            found: args.len(),
         });
     }
 
@@ -201,7 +201,7 @@ pub fn map(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
-            found: args.len()
+            found: args.len(),
         });
     }
 
@@ -213,7 +213,7 @@ pub fn map(args: &[Value]) -> Result<Value> {
                 .iter()
                 .map(|v| match v {
                     Value::Number(n) => Ok(Value::Number(n * 2.0)), // Example: double numbers
-                    _ => Ok(v.clone()), // Keep other types unchanged
+                    _ => Ok(v.clone()),                             // Keep other types unchanged
                 })
                 .collect();
 
@@ -236,7 +236,7 @@ pub fn filter(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
-            found: args.len()
+            found: args.len(),
         });
     }
 
@@ -266,7 +266,7 @@ pub fn reduce(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
-            found: args.len()
+            found: args.len(),
         });
     }
 
@@ -281,10 +281,12 @@ pub fn reduce(args: &[Value]) -> Result<Value> {
             for item in arr {
                 match item {
                     Value::Number(n) => sum += n,
-                    _ => return Err(InfraError::RuntimeError {
-                        message: "reduce currently only supports arrays of numbers".to_string(),
-                        context: None,
-                    }),
+                    _ => {
+                        return Err(InfraError::RuntimeError {
+                            message: "reduce currently only supports arrays of numbers".to_string(),
+                            context: None,
+                        })
+                    }
                 }
             }
 
@@ -304,7 +306,7 @@ pub fn find(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
-            found: args.len()
+            found: args.len(),
         });
     }
 
@@ -333,21 +335,19 @@ pub fn contains(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
-            found: args.len()
+            found: args.len(),
         });
     }
 
     match &args[0] {
         Value::Array(arr) => {
             let target = &args[1];
-            let found = arr.iter().any(|item| {
-                match (item, target) {
-                    (Value::Number(a), Value::Number(b)) => (a - b).abs() < f64::EPSILON,
-                    (Value::String(a), Value::String(b)) => a == b,
-                    (Value::Boolean(a), Value::Boolean(b)) => a == b,
-                    (Value::Null, Value::Null) => true,
-                    _ => false,
-                }
+            let found = arr.iter().any(|item| match (item, target) {
+                (Value::Number(a), Value::Number(b)) => (a - b).abs() < f64::EPSILON,
+                (Value::String(a), Value::String(b)) => a == b,
+                (Value::Boolean(a), Value::Boolean(b)) => a == b,
+                (Value::Null, Value::Null) => true,
+                _ => false,
             });
 
             Ok(Value::Boolean(found))
@@ -365,7 +365,7 @@ pub fn first(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
-            found: args.len()
+            found: args.len(),
         });
     }
 
@@ -390,7 +390,7 @@ pub fn last(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
-            found: args.len()
+            found: args.len(),
         });
     }
 
@@ -405,7 +405,6 @@ pub fn last(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-        ,
             context: None,
         }),
     }

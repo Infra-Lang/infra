@@ -15,8 +15,6 @@ pub fn length(args: &[Value]) -> Result<Value> {
             expected: "string".to_string(),
             found: args[0].type_name().to_string(),
             context: None,
-        ,
-            context: None,
         }),
     }
 }
@@ -42,8 +40,6 @@ pub fn split(args: &[Value]) -> Result<Value> {
             expected: "two strings".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
             context: Some("string.split() function".to_string()),
-        ,
-            context: None,
         }),
     }
 }
@@ -99,8 +95,6 @@ pub fn upper(args: &[Value]) -> Result<Value> {
             expected: "string".to_string(),
             found: args[0].type_name().to_string(),
             context: None,
-        ,
-            context: None,
         }),
     }
 }
@@ -120,8 +114,6 @@ pub fn lower(args: &[Value]) -> Result<Value> {
             expected: "string".to_string(),
             found: args[0].type_name().to_string(),
             context: None,
-        ,
-            context: None,
         }),
     }
 }
@@ -140,8 +132,6 @@ pub fn trim(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "string".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
-        ,
             context: None,
         }),
     }
@@ -163,7 +153,6 @@ pub fn contains(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "two strings".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-        ,
             context: None,
         }),
     }
@@ -199,7 +188,6 @@ pub fn substring(args: &[Value]) -> Result<Value> {
                 args[1].type_name(),
                 args[2].type_name()
             ),
-        ,
             context: None,
         }),
     }
@@ -226,7 +214,6 @@ pub fn replace(args: &[Value]) -> Result<Value> {
                 args[1].type_name(),
                 args[2].type_name()
             ),
-        ,
             context: None,
         }),
     }
@@ -248,7 +235,6 @@ pub fn starts_with(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "two strings".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-        ,
             context: None,
         }),
     }
@@ -268,7 +254,6 @@ pub fn ends_with(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "two strings".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-        ,
             context: None,
         }),
     }
@@ -297,7 +282,6 @@ pub fn repeat(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "string and number".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-        ,
             context: None,
         }),
     }
@@ -331,7 +315,6 @@ pub fn pad_left(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "string and number".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-        ,
             context: None,
         }),
     }
@@ -365,7 +348,6 @@ pub fn pad_right(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "string and number".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-        ,
             context: None,
         }),
     }
