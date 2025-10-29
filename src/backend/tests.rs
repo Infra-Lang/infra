@@ -1,6 +1,6 @@
 use crate::backend::bytecode::Compiler;
 use crate::backend::vm::VM;
-use crate::core::ast::{Program, Stmt, Expr};
+use crate::core::ast::{Expr, Program, Stmt};
 use crate::core::Value;
 
 #[cfg(test)]
@@ -19,7 +19,9 @@ mod tests {
 
         // Compile to bytecode
         let compiler = Compiler::new();
-        let chunk = compiler.compile(&program).expect("Compilation should succeed");
+        let chunk = compiler
+            .compile(&program)
+            .expect("Compilation should succeed");
 
         // Execute in VM
         let mut vm = VM::new();
@@ -39,7 +41,9 @@ mod tests {
 
         // Compile and execute
         let compiler = Compiler::new();
-        let chunk = compiler.compile(&program).expect("Compilation should succeed");
+        let chunk = compiler
+            .compile(&program)
+            .expect("Compilation should succeed");
 
         let mut vm = VM::new();
         vm.interpret(chunk).expect("Execution should succeed");
