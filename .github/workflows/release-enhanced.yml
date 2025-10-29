@@ -20,6 +20,7 @@ on:
 permissions:
   contents: write
   packages: write
+  releases: write
 
 jobs:
   test:
@@ -314,11 +315,15 @@ EOF
           cat checksums.txt
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: release-assets/*
           name: Infra v${{ steps.version.outputs.version }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           body: |
             # Infra Programming Language v${{ steps.version.outputs.version }}
 
@@ -447,14 +452,10 @@ EOF
             ```bash
             infra --version
             ```
-          draft: false
-          prerelease: false
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload checksums to release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: release-assets/checksums.txt
-          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
