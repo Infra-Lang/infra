@@ -8,7 +8,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/infra-lang/infra)
-[![Version](https://img.shields.io/badge/version-0.1.8-blue.svg)](https://github.com/infra-lang/infra/releases)
+[![Version](https://img.shields.io/badge/version-0.1.9-blue.svg)](https://github.com/infra-lang/infra/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)]()
 
 [Quick Start](#-quick-start) • [Features](#-features) • [Documentation](#-documentation) • [Examples](#-examples) • [Contributing](#-contributing)
