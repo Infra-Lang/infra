@@ -142,10 +142,35 @@ jobs:
         shell: powershell
         run: |
           New-Item -ItemType Directory -Path "release" -Force
-          Copy-Item "target\${{ matrix.target }}\release\${{ matrix.binary }}" "release\${{ matrix.binary }}"
-          if (Test-Path "install.ps1") { Copy-Item "install.ps1" "release\" }
-          if (Test-Path "README.md") { Copy-Item "README.md" "release\" }
-          if (Test-Path "LICENSE") { Copy-Item "LICENSE" "release\" }
+          Copy-Item "target\${{ matrix.target }}\release\${{ matrix.binary }}" "release\${{ matrix.binary }}" -ErrorAction SilentlyContinue
+          if (Test-Path "install.ps1") { Copy-Item "install.ps1" "release\" -ErrorAction SilentlyContinue }
+          if (Test-Path "README.md") { Copy-Item "README.md" "release\" -ErrorAction SilentlyContinue }
+          if (Test-Path "LICENSE") {
+            Copy-Item "LICENSE" "release\" -ErrorAction SilentlyContinue
+          } else {
+            Write-Output "LICENSE file not found, creating basic license"
+            "# Infra Programming Language License
+
+Copyright (c) 2024 Infra-Lang Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE." | Out-File -FilePath "release\LICENSE" -Encoding UTF8
+          }
 
       - name: Copy binary (Unix)
         if: matrix.os != 'windows-latest'
@@ -154,7 +179,34 @@ jobs:
           cp target/${{ matrix.target }}/release/${{ matrix.binary }} release/ || echo "Binary copy failed"
           cp install.sh release/ || echo "install.sh copy failed"
           cp README.md release/ || echo "README.md copy failed"
-          cp LICENSE release/ 2>/dev/null || echo "LICENSE file optional"
+          if [ -f LICENSE ]; then
+            cp LICENSE release/ || echo "LICENSE copy failed"
+          else
+            echo "Creating basic LICENSE file"
+            cat > release/LICENSE << 'EOF'
+# Infra Programming Language License
+
+Copyright (c) 2024 Infra-Lang Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+EOF
+          fi
           chmod +x release/${{ matrix.binary }} || echo "chmod binary failed"
           chmod +x release/install.sh || echo "chmod install.sh failed"
 
