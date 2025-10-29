@@ -1,5 +1,5 @@
 use crate::core::InfraError;
-use std::io::{self, Write};
+use std::io::Write;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 pub struct ErrorReporter {

@@ -4,7 +4,7 @@ pub mod io;
 pub mod math;
 pub mod string;
 
-use crate::core::{InfraError, Result, Value};
+use crate::core::{Result, Value};
 use std::collections::HashMap;
 
 /// Standard library module that provides built-in functions

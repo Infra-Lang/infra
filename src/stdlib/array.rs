@@ -6,6 +6,8 @@ pub fn length(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("array.length".to_string()),
+            line: None,
         });
     }
 
@@ -14,7 +16,10 @@ pub fn length(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("array.length function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -25,6 +30,8 @@ pub fn push(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("array.push".to_string()),
+            line: None,
         });
     }
 
@@ -37,7 +44,10 @@ pub fn push(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("array.push function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -48,6 +58,8 @@ pub fn pop(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("array.pop".to_string()),
+            line: None,
         });
     }
 
@@ -56,6 +68,10 @@ pub fn pop(args: &[Value]) -> Result<Value> {
             if arr.is_empty() {
                 Err(InfraError::RuntimeError {
                     message: "Cannot pop from empty array".to_string(),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
                 })
             } else {
                 let mut new_arr = arr.clone();
@@ -66,7 +82,10 @@ pub fn pop(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("array.pop function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -77,6 +96,8 @@ pub fn sort(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("array.sort".to_string()),
+            line: None,
         });
     }
 
@@ -91,6 +112,10 @@ pub fn sort(args: &[Value]) -> Result<Value> {
             if !arr.iter().all(|v| v.type_name() == first_type) {
                 return Err(InfraError::RuntimeError {
                     message: "Cannot sort array with mixed types".to_string(),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
                 });
             }
 
@@ -118,6 +143,10 @@ pub fn sort(args: &[Value]) -> Result<Value> {
                 _ => {
                     return Err(InfraError::RuntimeError {
                         message: format!("Cannot sort array of {}", first_type),
+                        line: None,
+                        column: None,
+                        stack_trace: vec![],
+                        source_code: None,
                     });
                 }
             }
@@ -127,7 +156,10 @@ pub fn sort(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("array.sort function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -138,6 +170,8 @@ pub fn reverse(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("array.reverse".to_string()),
+            line: None,
         });
     }
 
@@ -150,7 +184,10 @@ pub fn reverse(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("array.reverse function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -161,6 +198,8 @@ pub fn join(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("array.join".to_string()),
+            line: None,
         });
     }
 
@@ -175,7 +214,10 @@ pub fn join(args: &[Value]) -> Result<Value> {
                     Value::Null => Ok("null".to_string()),
                     _ => Err(InfraError::RuntimeError {
                         message: format!("Cannot convert {} to string for joining", v.type_name()),
-                        context: None,
+                        line: None,
+                        column: None,
+                        stack_trace: vec![],
+                        source_code: None,
                     }),
                 })
                 .collect();
@@ -188,7 +230,10 @@ pub fn join(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array and string".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-            context: None,
+            context: Some("array.join function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -202,6 +247,8 @@ pub fn map(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("array.map".to_string()),
+            line: None,
         });
     }
 
@@ -225,7 +272,10 @@ pub fn map(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("array.map function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -237,6 +287,8 @@ pub fn filter(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("array.filter".to_string()),
+            line: None,
         });
     }
 
@@ -256,7 +308,10 @@ pub fn filter(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array and number".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-            context: None,
+            context: Some("array.filter function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -267,6 +322,8 @@ pub fn reduce(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("array.reduce".to_string()),
+            line: None,
         });
     }
 
@@ -284,7 +341,10 @@ pub fn reduce(args: &[Value]) -> Result<Value> {
                     _ => {
                         return Err(InfraError::RuntimeError {
                             message: "reduce currently only supports arrays of numbers".to_string(),
-                            context: None,
+                            line: None,
+                            column: None,
+                            stack_trace: vec![],
+                            source_code: None,
                         })
                     }
                 }
@@ -295,7 +355,10 @@ pub fn reduce(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("array.reduce function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -307,6 +370,8 @@ pub fn find(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("array.find".to_string()),
+            line: None,
         });
     }
 
@@ -325,7 +390,10 @@ pub fn find(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array and number".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-            context: None,
+            context: Some("array.find function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -336,6 +404,8 @@ pub fn contains(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("array.contains".to_string()),
+            line: None,
         });
     }
 
@@ -355,7 +425,10 @@ pub fn contains(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("array.contains function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -366,6 +439,8 @@ pub fn first(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("array.first".to_string()),
+            line: None,
         });
     }
 
@@ -380,7 +455,10 @@ pub fn first(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("array.first function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -391,6 +469,8 @@ pub fn last(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("array.last".to_string()),
+            line: None,
         });
     }
 
@@ -405,7 +485,10 @@ pub fn last(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("array.last function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }

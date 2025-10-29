@@ -1,7 +1,7 @@
-use std::fs;
+use crate::backend::Interpreter;
 use crate::core::{InfraError, Result};
 use crate::frontend::{Lexer, Parser};
-use crate::backend::Interpreter;
+use std::fs;
 
 pub struct Runner {
     interpreter: Interpreter,
@@ -15,13 +15,15 @@ impl Runner {
     }
 
     pub fn run_file(&mut self, filename: &str) -> Result<()> {
-        let contents = fs::read_to_string(filename)
-            .map_err(|err| InfraError::IoError {
-                message: format!("Error reading file '{}': {}", filename, err),
-            })?;
+        let contents = fs::read_to_string(filename).map_err(|err| InfraError::IoError {
+            message: format!("Error reading file '{}': {}", filename, err),
+            operation: Some("read file".to_string()),
+            path: Some(filename.to_string()),
+        })?;
 
         // Set the current file path for module resolution
-        let file_path = std::path::Path::new(filename).canonicalize()
+        let file_path = std::path::Path::new(filename)
+            .canonicalize()
             .unwrap_or_else(|_| std::path::PathBuf::from(filename));
         self.interpreter.set_current_file(file_path);
 

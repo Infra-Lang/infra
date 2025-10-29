@@ -6,6 +6,8 @@ pub fn length(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("string_length".to_string()),
+            line: None,
         });
     }
 
@@ -14,7 +16,10 @@ pub fn length(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "string".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("string_length() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -25,6 +30,8 @@ pub fn split(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("string_split".to_string()),
+            line: None,
         });
     }
 
@@ -39,7 +46,10 @@ pub fn split(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "two strings".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-            context: Some("string.split() function".to_string()),
+            context: Some("string_split() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -50,6 +60,8 @@ pub fn join(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("string_join".to_string()),
+            line: None,
         });
     }
 
@@ -64,7 +76,10 @@ pub fn join(args: &[Value]) -> Result<Value> {
                         return Err(InfraError::TypeError {
                             expected: "array of strings".to_string(),
                             found: format!("array containing {}", item.type_name()),
-                            context: Some("string.join() function".to_string()),
+                            context: Some("string_join() function".to_string()),
+                            line: None,
+                            column: None,
+                            hint: None,
                         })
                     }
                 }
@@ -75,7 +90,10 @@ pub fn join(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "array and string".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-            context: None,
+            context: Some("string_join() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -86,6 +104,8 @@ pub fn upper(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("string_upper".to_string()),
+            line: None,
         });
     }
 
@@ -94,7 +114,10 @@ pub fn upper(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "string".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("string_upper() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -105,6 +128,8 @@ pub fn lower(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("string_lower".to_string()),
+            line: None,
         });
     }
 
@@ -113,7 +138,10 @@ pub fn lower(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "string".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("string_lower() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -124,6 +152,8 @@ pub fn trim(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("string_trim".to_string()),
+            line: None,
         });
     }
 
@@ -132,7 +162,10 @@ pub fn trim(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "string".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("string_trim() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -143,6 +176,8 @@ pub fn contains(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("string_contains".to_string()),
+            line: None,
         });
     }
 
@@ -153,7 +188,10 @@ pub fn contains(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "two strings".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-            context: None,
+            context: Some("string_contains() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -164,6 +202,8 @@ pub fn substring(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 3,
             found: args.len(),
+            function_name: Some("string_substring".to_string()),
+            line: None,
         });
     }
 
@@ -175,6 +215,10 @@ pub fn substring(args: &[Value]) -> Result<Value> {
             if start_idx > s.len() || end_idx > s.len() || start_idx > end_idx {
                 return Err(InfraError::RuntimeError {
                     message: "Substring indices out of bounds".to_string(),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
                 });
             }
 
@@ -188,7 +232,10 @@ pub fn substring(args: &[Value]) -> Result<Value> {
                 args[1].type_name(),
                 args[2].type_name()
             ),
-            context: None,
+            context: Some("string_substring() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -199,6 +246,8 @@ pub fn replace(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 3,
             found: args.len(),
+            function_name: Some("string_replace".to_string()),
+            line: None,
         });
     }
 
@@ -214,7 +263,10 @@ pub fn replace(args: &[Value]) -> Result<Value> {
                 args[1].type_name(),
                 args[2].type_name()
             ),
-            context: None,
+            context: Some("string_replace() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -225,6 +277,8 @@ pub fn starts_with(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("string_starts_with".to_string()),
+            line: None,
         });
     }
 
@@ -235,7 +289,10 @@ pub fn starts_with(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "two strings".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-            context: None,
+            context: Some("string_starts_with() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -246,6 +303,8 @@ pub fn ends_with(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("string_ends_with".to_string()),
+            line: None,
         });
     }
 
@@ -254,7 +313,10 @@ pub fn ends_with(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "two strings".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-            context: None,
+            context: Some("string_ends_with() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -265,6 +327,8 @@ pub fn repeat(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("string_repeat".to_string()),
+            line: None,
         });
     }
 
@@ -273,6 +337,10 @@ pub fn repeat(args: &[Value]) -> Result<Value> {
             if *count < 0.0 {
                 return Err(InfraError::RuntimeError {
                     message: "Repeat count cannot be negative".to_string(),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
                 });
             }
 
@@ -282,7 +350,10 @@ pub fn repeat(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "string and number".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-            context: None,
+            context: Some("string_repeat() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -293,6 +364,8 @@ pub fn pad_left(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("string_pad_left".to_string()),
+            line: None,
         });
     }
 
@@ -301,6 +374,10 @@ pub fn pad_left(args: &[Value]) -> Result<Value> {
             if *width < 0.0 {
                 return Err(InfraError::RuntimeError {
                     message: "Pad width cannot be negative".to_string(),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
                 });
             }
 
@@ -315,7 +392,10 @@ pub fn pad_left(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "string and number".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-            context: None,
+            context: Some("string_pad_left() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -326,6 +406,8 @@ pub fn pad_right(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("string_pad_right".to_string()),
+            line: None,
         });
     }
 
@@ -334,6 +416,10 @@ pub fn pad_right(args: &[Value]) -> Result<Value> {
             if *width < 0.0 {
                 return Err(InfraError::RuntimeError {
                     message: "Pad width cannot be negative".to_string(),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
                 });
             }
 
@@ -348,7 +434,10 @@ pub fn pad_right(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "string and number".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-            context: None,
+            context: Some("string_pad_right() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }

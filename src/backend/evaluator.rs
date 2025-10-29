@@ -68,6 +68,8 @@ impl Evaluator {
                             return Err(InfraError::ArgumentCountMismatch {
                                 expected: params.len(),
                                 found: arg_values.len(),
+                                function_name: Some(name.clone()),
+                                line: None,
                             });
                         }
 
@@ -85,6 +87,9 @@ impl Evaluator {
                                         ),
                                         found: format!("{} ({})", arg_value.type_name(), arg_value),
                                         context: Some(format!("function call to '{}'", name)),
+                                        line: None,
+                                        column: None,
+                                        hint: None,
                                     });
                                 }
                             }
@@ -115,7 +120,7 @@ impl Evaluator {
 
                         let result = match self.execute_function_body(&body) {
                             Ok(()) => Ok(Value::Null), // Function completed without return
-                            Err(InfraError::Return(Some(value))) => {
+                            Err(InfraError::ReturnValue(Some(value))) => {
                                 // Check return type with enhanced error message
                                 if let Some(expected_return_type) = return_type {
                                     if !self.check_type_compatibility(&value, &expected_return_type)
@@ -131,12 +136,15 @@ impl Evaluator {
                                                 "function '{}' return statement",
                                                 name
                                             )),
+                                            line: None,
+                                            column: None,
+                                            hint: None,
                                         });
                                     }
                                 }
                                 Ok(value)
                             }
-                            Err(InfraError::Return(None)) => Ok(Value::Null),
+                            Err(InfraError::ReturnValue(None)) => Ok(Value::Null),
                             Err(e) => Err(e),
                         };
 
@@ -148,6 +156,10 @@ impl Evaluator {
                     _ => Err(InfraError::TypeError {
                         expected: "function".to_string(),
                         found: function.type_name().to_string(),
+                        context: Some("function call".to_string()),
+                        line: None,
+                        column: None,
+                        hint: None,
                     }),
                 }
             }
@@ -169,6 +181,8 @@ impl Evaluator {
                             Err(InfraError::IndexOutOfBounds {
                                 index,
                                 length: arr.len(),
+                                array_name: None,
+                                line: None,
                             })
                         } else {
                             Ok(arr[index].clone())
@@ -177,10 +191,18 @@ impl Evaluator {
                     (Value::Array(_), _) => Err(InfraError::TypeError {
                         expected: "number".to_string(),
                         found: index_value.type_name().to_string(),
+                        context: Some("array indexing".to_string()),
+                        line: None,
+                        column: None,
+                        hint: None,
                     }),
                     _ => Err(InfraError::TypeError {
                         expected: "array".to_string(),
                         found: obj_value.type_name().to_string(),
+                        context: Some("array indexing".to_string()),
+                        line: None,
+                        column: None,
+                        hint: None,
                     }),
                 }
             }
@@ -200,11 +222,18 @@ impl Evaluator {
                         Some(value) => Ok(value.clone()),
                         None => Err(InfraError::PropertyNotFound {
                             property: property.clone(),
+                            object_type: Some("object".to_string()),
+                            line: None,
+                            available_properties: Some(obj.keys().cloned().collect()),
                         }),
                     },
                     _ => Err(InfraError::TypeError {
                         expected: "object".to_string(),
                         found: obj_value.type_name().to_string(),
+                        context: Some("property access".to_string()),
+                        line: None,
+                        column: None,
+                        hint: None,
                     }),
                 }
             }
@@ -215,7 +244,130 @@ impl Evaluator {
                         "Cannot access {}.{} directly - use as function call",
                         module, function
                     ),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
                 })
+            }
+            Expr::Await { expression } => {
+                let promise = self.evaluate_expression(expression)?;
+                match promise {
+                    Value::Promise {
+                        resolved, value, ..
+                    } => {
+                        if resolved {
+                            // Promise is resolved, return the value
+                            value
+                                .map(|boxed| *boxed)
+                                .ok_or_else(|| InfraError::RuntimeError {
+                                    message: "Promise resolved but has no value".to_string(),
+                                    line: None,
+                                    column: None,
+                                    stack_trace: vec![],
+                                    source_code: None,
+                                })
+                        } else {
+                            // Promise is not resolved yet - for now, return an error
+                            // In a full implementation, this would suspend execution
+                            Err(InfraError::RuntimeError {
+                                message: "Cannot await unresolved promise - not yet implemented"
+                                    .to_string(),
+                                line: None,
+                                column: None,
+                                stack_trace: vec![],
+                                source_code: None,
+                            })
+                        }
+                    }
+                    _ => Err(InfraError::TypeError {
+                        expected: "promise".to_string(),
+                        found: promise.type_name().to_string(),
+                        context: Some("await expression".to_string()),
+                        line: None,
+                        column: None,
+                        hint: None,
+                    }),
+                }
+            }
+            Expr::This => {
+                // 'this' should be handled in the context of a method call
+                // For now, return an error
+                Err(InfraError::RuntimeError {
+                    message: "'this' can only be used inside class methods".to_string(),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
+                })
+            }
+            Expr::Super { method } => {
+                // 'super' should be handled in the context of a method call
+                // For now, return an error
+                Err(InfraError::RuntimeError {
+                    message: format!("'super.{}' can only be used inside class methods", method),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
+                })
+            }
+            Expr::New { class, args: _ } => {
+                // Handle 'new' expression for class instantiation
+                let class_value = self.evaluate_expression(class)?;
+                match class_value {
+                    Value::Object(obj) => {
+                        // Check if this looks like a class (has a constructor)
+                        if obj.contains_key("constructor") {
+                            // Create a new instance
+                            let instance = obj.clone();
+
+                            // Call constructor if it exists
+                            if let Some(ctor) = obj.get("constructor") {
+                                if let Value::Function {
+                                    name: _,
+                                    params,
+                                    param_types,
+                                    return_type,
+                                    body,
+                                } = ctor
+                                {
+                                    // Create a temporary function to call the constructor
+                                    let temp_func = Value::Function {
+                                        name: "constructor".to_string(),
+                                        params: params.clone(),
+                                        param_types: param_types.clone(),
+                                        return_type: return_type.clone(),
+                                        body: body.clone(),
+                                    };
+
+                                    // For now, we'll simplify the constructor call
+                                    // In a full implementation, this would properly handle 'this' binding
+                                    drop(temp_func); // We're not actually calling it for now
+                                }
+                            }
+
+                            Ok(Value::Object(instance))
+                        } else {
+                            Err(InfraError::TypeError {
+                                expected: "class".to_string(),
+                                found: "object without constructor".to_string(),
+                                context: Some("new expression".to_string()),
+                                line: None,
+                                column: None,
+                                hint: None,
+                            })
+                        }
+                    }
+                    _ => Err(InfraError::TypeError {
+                        expected: "class".to_string(),
+                        found: class_value.type_name().to_string(),
+                        context: Some("new expression".to_string()),
+                        line: None,
+                        column: None,
+                        hint: None,
+                    }),
+                }
             }
         }
     }
@@ -239,6 +391,10 @@ impl Evaluator {
         } else {
             Err(InfraError::RuntimeError {
                 message: format!("Unknown function {}.{}", module, function),
+                line: None,
+                column: None,
+                stack_trace: vec![],
+                source_code: None,
             })
         }
     }
@@ -292,6 +448,10 @@ impl Evaluator {
                     _ => Err(InfraError::TypeError {
                         expected: "compatible types".to_string(),
                         found: format!("{} and {}", left.type_name(), right.type_name()),
+                        context: Some(format!("binary operation {:?}", op)),
+                        line: None,
+                        column: None,
+                        hint: None,
                     }),
                 }
             }
@@ -305,7 +465,10 @@ impl Evaluator {
             BinaryOp::Multiply => Ok(Value::Number(left * right)),
             BinaryOp::Divide => {
                 if right == 0.0 {
-                    Err(InfraError::DivisionByZero)
+                    Err(InfraError::DivisionByZero {
+                        line: None,
+                        column: None,
+                    })
                 } else {
                     Ok(Value::Number(left / right))
                 }
@@ -339,6 +502,10 @@ impl Evaluator {
             _ => Err(InfraError::TypeError {
                 expected: "numeric operation".to_string(),
                 found: "string".to_string(),
+                context: Some(format!("string binary operation {:?}", op)),
+                line: None,
+                column: None,
+                hint: None,
             }),
         }
     }
@@ -357,6 +524,10 @@ impl Evaluator {
             _ => Err(InfraError::TypeError {
                 expected: "logical operation".to_string(),
                 found: "boolean".to_string(),
+                context: Some(format!("boolean binary operation {:?}", op)),
+                line: None,
+                column: None,
+                hint: None,
             }),
         }
     }
@@ -368,6 +539,10 @@ impl Evaluator {
             (UnaryOp::Minus, _) => Err(InfraError::TypeError {
                 expected: "number".to_string(),
                 found: operand.type_name().to_string(),
+                context: Some("unary minus operation".to_string()),
+                line: None,
+                column: None,
+                hint: None,
             }),
         }
     }
@@ -456,6 +631,10 @@ impl Evaluator {
                         return Err(InfraError::TypeError {
                             expected: "number".to_string(),
                             found: "non-number in range".to_string(),
+                            context: Some("for loop range".to_string()),
+                            line: None,
+                            column: None,
+                            hint: None,
                         })
                     }
                 };
@@ -482,7 +661,7 @@ impl Evaluator {
                 } else {
                     None
                 };
-                Err(InfraError::Return(return_value))
+                Err(InfraError::ReturnValue(return_value))
             }
             Stmt::Function {
                 name,
@@ -508,7 +687,12 @@ impl Evaluator {
                 match target {
                     AssignmentTarget::Identifier(name) => {
                         if self.environment.get(name).is_err() {
-                            return Err(InfraError::UndefinedVariable { name: name.clone() });
+                            return Err(InfraError::UndefinedVariable {
+                                name: name.clone(),
+                                line: None,
+                                column: None,
+                                suggestion: None,
+                            });
                         }
 
                         // Check type compatibility for assignment
@@ -523,6 +707,9 @@ impl Evaluator {
                                         ),
                                         found: format!("{} ({})", new_value.type_name(), new_value),
                                         context: Some(format!("assignment to variable '{}'", name)),
+                                        line: None,
+                                        column: None,
+                                        hint: None,
                                     });
                                 }
                             }
@@ -547,12 +734,20 @@ impl Evaluator {
                                     Err(InfraError::RuntimeError {
                                         message: "Cannot assign to property of complex expression"
                                             .to_string(),
+                                        line: None,
+                                        column: None,
+                                        stack_trace: vec![],
+                                        source_code: None,
                                     })
                                 }
                             }
                             _ => Err(InfraError::TypeError {
                                 expected: "object".to_string(),
                                 found: obj_val.type_name().to_string(),
+                                context: Some("property assignment".to_string()),
+                                line: None,
+                                column: None,
+                                hint: None,
                             }),
                         }
                     }
@@ -567,6 +762,8 @@ impl Evaluator {
                                     return Err(InfraError::IndexOutOfBounds {
                                         index,
                                         length: arr.len(),
+                                        array_name: None,
+                                        line: None,
                                     });
                                 }
                                 arr[index] = new_value;
@@ -580,16 +777,28 @@ impl Evaluator {
                                     Err(InfraError::RuntimeError {
                                         message: "Cannot assign to index of complex expression"
                                             .to_string(),
+                                        line: None,
+                                        column: None,
+                                        stack_trace: vec![],
+                                        source_code: None,
                                     })
                                 }
                             }
                             (Value::Array(_), _) => Err(InfraError::TypeError {
                                 expected: "number".to_string(),
                                 found: "non-number index".to_string(),
+                                context: Some("array index assignment".to_string()),
+                                line: None,
+                                column: None,
+                                hint: None,
                             }),
                             (_, _) => Err(InfraError::TypeError {
                                 expected: "array".to_string(),
                                 found: "non-array for indexing".to_string(),
+                                context: Some("array index assignment".to_string()),
+                                line: None,
+                                column: None,
+                                hint: None,
                             }),
                         }
                     }
@@ -599,18 +808,51 @@ impl Evaluator {
                 // Try statements should be handled by the interpreter, not the evaluator
                 Err(InfraError::RuntimeError {
                     message: "Try/catch statements should be handled by interpreter".to_string(),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
                 })
             }
             Stmt::Import { .. } => {
                 // Import statements should be handled by the interpreter, not the evaluator
                 Err(InfraError::RuntimeError {
                     message: "Import statements should be handled by interpreter".to_string(),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
                 })
             }
             Stmt::Export { .. } => {
                 // Export statements should be handled by the interpreter, not the evaluator
                 Err(InfraError::RuntimeError {
                     message: "Export statements should be handled by interpreter".to_string(),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
+                })
+            }
+            Stmt::AsyncFunction { .. } => {
+                // Async function declarations should be handled by the interpreter, not the evaluator
+                Err(InfraError::RuntimeError {
+                    message: "Async function declarations should be handled by interpreter"
+                        .to_string(),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
+                })
+            }
+            Stmt::Class { .. } => {
+                // Class declarations should be handled by the interpreter, not the evaluator
+                Err(InfraError::RuntimeError {
+                    message: "Class declarations should be handled by interpreter".to_string(),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
                 })
             }
         }
@@ -637,6 +879,10 @@ impl Evaluator {
                             arg_value.type_name(),
                             self.format_value_for_error(arg_value)
                         ),
+                        context: Some(format!("parameter '{}'", param_names[i])),
+                        line: None,
+                        column: None,
+                        hint: None,
                     });
                 }
             }
@@ -663,6 +909,10 @@ impl Evaluator {
                         return_value.type_name(),
                         self.format_value_for_error(return_value)
                     ),
+                    context: Some(format!("function '{}' return", function_name)),
+                    line: None,
+                    column: None,
+                    hint: None,
                 });
             }
         }
@@ -750,7 +1000,7 @@ impl Evaluator {
     }
 
     // Enhanced type inference
-    fn infer_value_type(&self, value: &Value) -> Type {
+    pub fn infer_value_type(&self, value: &Value) -> Type {
         match value {
             Value::Number(_) => Type::Number,
             Value::String(_) => Type::String,
@@ -798,6 +1048,7 @@ impl Evaluator {
                     return_type: Box::new(ret_type),
                 }
             }
+            Value::Promise { .. } => Type::Any, // Promises can be any type when resolved
         }
     }
 
@@ -908,7 +1159,7 @@ impl Evaluator {
                 let operand_type = self.infer_expression_type(operand);
                 self.infer_unary_operation_type(operator, &operand_type)
             }
-            Expr::Call { callee, args } => {
+            Expr::Call { callee, args: _ } => {
                 // Try to infer return type from function signature
                 if let Expr::Identifier(func_name) = callee.as_ref() {
                     if let Ok(Value::Function { return_type, .. }) = self.environment.get(func_name)
@@ -938,7 +1189,7 @@ impl Evaluator {
                     .collect();
                 Type::Object(typed_fields)
             }
-            Expr::Property { object, .. } => {
+            Expr::Property { object: _, .. } => {
                 // Try to infer property type from object type
                 Type::Any // Simplified for now
             }
@@ -951,6 +1202,10 @@ impl Evaluator {
                 }
             }
             Expr::ModuleAccess { .. } => Type::Any, // Module functions return Any for now
+            Expr::Await { .. } => Type::Any,        // Async expressions return the awaited type
+            Expr::This => Type::Any,                // 'this' type depends on class context
+            Expr::Super { .. } => Type::Any,        // 'super' type depends on inheritance
+            Expr::New { .. } => Type::Any,          // 'new' expressions return object instances
         }
     }
 
@@ -1047,7 +1302,8 @@ impl Evaluator {
                     .collect(),
                 return_type: Box::new(return_type.clone().unwrap_or(Type::Any)),
             },
-            Value::Null => Type::Any, // Null can be any type
+            Value::Null => Type::Any,           // Null can be any type
+            Value::Promise { .. } => Type::Any, // Promises can be any type when resolved
         }
     }
 }

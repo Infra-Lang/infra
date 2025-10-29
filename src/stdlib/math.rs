@@ -6,6 +6,8 @@ pub fn sqrt(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("math_sqrt".to_string()),
+            line: None,
         });
     }
 
@@ -14,6 +16,10 @@ pub fn sqrt(args: &[Value]) -> Result<Value> {
             if *n < 0.0 {
                 Err(InfraError::RuntimeError {
                     message: "Cannot take square root of negative number".to_string(),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
                 })
             } else {
                 Ok(Value::Number(n.sqrt()))
@@ -22,7 +28,10 @@ pub fn sqrt(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "number".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("math_sqrt() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -33,6 +42,8 @@ pub fn abs(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("math_abs".to_string()),
+            line: None,
         });
     }
 
@@ -41,7 +52,10 @@ pub fn abs(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "number".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("math_abs() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -52,6 +66,8 @@ pub fn max(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("math_max".to_string()),
+            line: None,
         });
     }
 
@@ -60,7 +76,10 @@ pub fn max(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "two numbers".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-            context: None,
+            context: Some("math_max() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -71,6 +90,8 @@ pub fn min(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("math_min".to_string()),
+            line: None,
         });
     }
 
@@ -79,7 +100,10 @@ pub fn min(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "two numbers".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-            context: None,
+            context: Some("math_min() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -90,6 +114,8 @@ pub fn pow(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 2,
             found: args.len(),
+            function_name: Some("math_pow".to_string()),
+            line: None,
         });
     }
 
@@ -98,7 +124,10 @@ pub fn pow(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "two numbers".to_string(),
             found: format!("{} and {}", args[0].type_name(), args[1].type_name()),
-            context: None,
+            context: Some("math_pow() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -109,6 +138,8 @@ pub fn floor(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("math_floor".to_string()),
+            line: None,
         });
     }
 
@@ -117,7 +148,10 @@ pub fn floor(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "number".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("math_floor() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -128,6 +162,8 @@ pub fn ceil(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("math_ceil".to_string()),
+            line: None,
         });
     }
 
@@ -136,7 +172,10 @@ pub fn ceil(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "number".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("math_ceil() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }
@@ -147,6 +186,8 @@ pub fn round(args: &[Value]) -> Result<Value> {
         return Err(InfraError::ArgumentCountMismatch {
             expected: 1,
             found: args.len(),
+            function_name: Some("math_round".to_string()),
+            line: None,
         });
     }
 
@@ -155,7 +196,10 @@ pub fn round(args: &[Value]) -> Result<Value> {
         _ => Err(InfraError::TypeError {
             expected: "number".to_string(),
             found: args[0].type_name().to_string(),
-            context: None,
+            context: Some("math_round() function".to_string()),
+            line: None,
+            column: None,
+            hint: None,
         }),
     }
 }

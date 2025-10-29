@@ -173,7 +173,13 @@ impl VM {
                     match value {
                         Value::Number(n) => self.push(Value::Number(-n))?,
                         _ => {
-                            return Err(InfraError::Runtime("Can only negate numbers".to_string()))
+                            return Err(InfraError::RuntimeError {
+                                message: "Can only negate numbers".to_string(),
+                                line: None,
+                                column: None,
+                                stack_trace: vec![],
+                                source_code: None,
+                            })
                         }
                     }
                 }
@@ -198,7 +204,13 @@ impl VM {
                             self.push(Value::Boolean(a < b))?;
                         }
                         _ => {
-                            return Err(InfraError::Runtime("Can only compare numbers".to_string()))
+                            return Err(InfraError::RuntimeError {
+                                message: "Can only compare numbers".to_string(),
+                                line: None,
+                                column: None,
+                                stack_trace: vec![],
+                                source_code: None,
+                            })
                         }
                     }
                 }
@@ -211,7 +223,13 @@ impl VM {
                             self.push(Value::Boolean(a > b))?;
                         }
                         _ => {
-                            return Err(InfraError::Runtime("Can only compare numbers".to_string()))
+                            return Err(InfraError::RuntimeError {
+                                message: "Can only compare numbers".to_string(),
+                                line: None,
+                                column: None,
+                                stack_trace: vec![],
+                                source_code: None,
+                            })
                         }
                     }
                 }
@@ -224,7 +242,13 @@ impl VM {
                             self.push(Value::Boolean(a <= b))?;
                         }
                         _ => {
-                            return Err(InfraError::Runtime("Can only compare numbers".to_string()))
+                            return Err(InfraError::RuntimeError {
+                                message: "Can only compare numbers".to_string(),
+                                line: None,
+                                column: None,
+                                stack_trace: vec![],
+                                source_code: None,
+                            })
                         }
                     }
                 }
@@ -237,7 +261,13 @@ impl VM {
                             self.push(Value::Boolean(a >= b))?;
                         }
                         _ => {
-                            return Err(InfraError::Runtime("Can only compare numbers".to_string()))
+                            return Err(InfraError::RuntimeError {
+                                message: "Can only compare numbers".to_string(),
+                                line: None,
+                                column: None,
+                                stack_trace: vec![],
+                                source_code: None,
+                            })
                         }
                     }
                 }
@@ -283,9 +313,13 @@ impl VM {
                         if let Value::String(key_str) = key {
                             object.insert(key_str, value);
                         } else {
-                            return Err(InfraError::Runtime(
-                                "Object keys must be strings".to_string(),
-                            ));
+                            return Err(InfraError::RuntimeError {
+                                message: "Object keys must be strings".to_string(),
+                                line: None,
+                                column: None,
+                                stack_trace: vec![],
+                                source_code: None,
+                            });
                         }
                     }
                     self.push(Value::Object(object))?;
@@ -351,7 +385,7 @@ impl VM {
                     args.reverse();
 
                     // Pop the function and call it
-                    let function = self.pop()?;
+                    let _function = self.pop()?;
                     // TODO: Implement proper async function calling
                     self.push(Value::Null)?;
                 }
@@ -361,10 +395,13 @@ impl VM {
                 }
 
                 _ => {
-                    return Err(InfraError::Runtime(format!(
-                        "Unimplemented opcode: {:?}",
-                        instruction
-                    )));
+                    return Err(InfraError::RuntimeError {
+                        message: format!("Unimplemented opcode: {:?}", instruction),
+                        line: None,
+                        column: None,
+                        stack_trace: vec![],
+                        source_code: None,
+                    });
                 }
             }
         }
@@ -394,11 +431,11 @@ impl VM {
         })
     }
 
-    fn resolve_promise(&mut self, value: Value) -> Result<(), InfraError> {
+    fn resolve_promise(&mut self, _value: Value) -> Result<(), InfraError> {
         // Get the current promise being resolved
         if let Some(current_promise) = &self.async_state.current_promise {
             if let Value::Promise { resolved, .. } = current_promise {
-                if !*resolved {
+                if !resolved {
                     // TODO: Implement promise resolution logic
                     // For now, just mark as resolved
                     // In a full implementation, this would:
@@ -412,7 +449,7 @@ impl VM {
         Ok(())
     }
 
-    fn reject_promise(&mut self, error: Value) -> Result<(), InfraError> {
+    fn reject_promise(&mut self, _error: Value) -> Result<(), InfraError> {
         // Get the current promise being rejected
         if let Some(current_promise) = &self.async_state.current_promise {
             if let Value::Promise { rejected, .. } = current_promise {
@@ -428,20 +465,26 @@ impl VM {
     fn await_promise(&mut self, promise: Value) -> Result<Option<Value>, InfraError> {
         match promise {
             Value::Promise {
-                resolved, value, ..
+                resolved,
+                ref value,
+                ..
             } => {
-                if *resolved {
+                if resolved {
                     // Promise is already resolved, return the value
-                    Ok(value.clone())
+                    Ok(value.clone().map(|boxed| *boxed))
                 } else {
                     // Promise is not resolved yet, suspend execution
                     self.suspend_execution(promise)?;
                     Ok(None)
                 }
             }
-            _ => Err(InfraError::Runtime(
-                "await can only be used with promises".to_string(),
-            )),
+            _ => Err(InfraError::RuntimeError {
+                message: "await can only be used with promises".to_string(),
+                line: None,
+                column: None,
+                stack_trace: vec![],
+                source_code: None,
+            }),
         }
     }
 
@@ -490,7 +533,7 @@ impl VM {
         Ok(())
     }
 
-    fn execute_microtask(&mut self, task: MicroTask) -> Result<(), InfraError> {
+    fn execute_microtask(&mut self, _task: MicroTask) -> Result<(), InfraError> {
         // Execute the callback with the resolved value
         // TODO: Implement microtask execution
         Ok(())
@@ -529,7 +572,7 @@ impl VM {
         Ok(())
     }
 
-    fn execute_timer_callback(&mut self, timer: Timer) -> Result<(), InfraError> {
+    fn execute_timer_callback(&mut self, _timer: Timer) -> Result<(), InfraError> {
         // Execute the timer callback
         // TODO: Implement timer callback execution
         Ok(())
@@ -537,16 +580,26 @@ impl VM {
 
     fn push(&mut self, value: Value) -> Result<(), InfraError> {
         if self.stack.len() >= STACK_MAX {
-            return Err(InfraError::Runtime("Stack overflow".to_string()));
+            return Err(InfraError::RuntimeError {
+                message: "Stack overflow".to_string(),
+                line: None,
+                column: None,
+                stack_trace: vec![],
+                source_code: None,
+            });
         }
         self.stack.push(value);
         Ok(())
     }
 
     fn pop(&mut self) -> Result<Value, InfraError> {
-        self.stack
-            .pop()
-            .ok_or_else(|| InfraError::Runtime("Stack underflow".to_string()))
+        self.stack.pop().ok_or_else(|| InfraError::RuntimeError {
+            message: "Stack underflow".to_string(),
+            line: None,
+            column: None,
+            stack_trace: vec![],
+            source_code: None,
+        })
     }
 
     fn peek(&self, distance: usize) -> &Value {

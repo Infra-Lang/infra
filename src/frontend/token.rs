@@ -35,6 +35,7 @@ pub enum TokenType {
     This,    // New: this keyword
     Super,   // New: super keyword
     Init,    // New: constructor keyword
+    New,     // New: new keyword for instance creation
 
     // Type annotations (NEW)
     Arrow,       // -> for function return types
@@ -119,6 +120,7 @@ impl TokenType {
                 | TokenType::This
                 | TokenType::Super
                 | TokenType::Init
+                | TokenType::New
         )
     }
 

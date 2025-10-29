@@ -1,7 +1,5 @@
 use crate::backend::{Environment, Evaluator, ModuleSystem};
-use crate::core::{ast::*, InfraError, Result, Value};
-use crate::stdlib::StandardLibrary;
-use std::collections::HashMap;
+use crate::core::{ast::*, Result, Value};
 use std::path::Path;
 
 pub struct Interpreter {
@@ -57,7 +55,7 @@ impl Interpreter {
                     self.evaluator.define_variable_with_type(
                         name.clone(),
                         val,
-                        Some(expected_type),
+                        Some(expected_type.clone()),
                     );
                 } else {
                     // No type annotation - infer type from value
@@ -138,6 +136,10 @@ impl Interpreter {
                         return Err(crate::core::InfraError::TypeError {
                             expected: "number".to_string(),
                             found: "non-number in range".to_string(),
+                            context: Some("for loop range".to_string()),
+                            line: None,
+                            column: None,
+                            hint: None,
                         })
                     }
                 };
@@ -168,7 +170,7 @@ impl Interpreter {
                 } else {
                     None
                 };
-                Err(crate::core::InfraError::Return(return_value))
+                Err(crate::core::InfraError::ReturnValue(return_value))
             }
             Stmt::Function {
                 name,
@@ -211,7 +213,7 @@ impl Interpreter {
                             crate::core::InfraError::Exception { .. }
                                 | crate::core::InfraError::RuntimeError { .. }
                                 | crate::core::InfraError::TypeError { .. }
-                                | crate::core::InfraError::DivisionByZero
+                                | crate::core::InfraError::DivisionByZero { .. }
                                 | crate::core::InfraError::IndexOutOfBounds { .. }
                                 | crate::core::InfraError::PropertyNotFound { .. }
                                 | crate::core::InfraError::UndefinedVariable { .. }
@@ -269,6 +271,10 @@ impl Interpreter {
                                         "Export '{}' not found in module '{}'",
                                         import_item.name, module_path
                                     ),
+                                    line: None,
+                                    column: None,
+                                    stack_trace: vec![],
+                                    source_code: None,
                                 });
                             }
                         }
@@ -297,6 +303,57 @@ impl Interpreter {
             Stmt::Export { item: _ } => {
                 // Export statements are handled during module loading
                 // When this statement is executed in a regular context, it's a no-op
+                Ok(())
+            }
+            Stmt::AsyncFunction {
+                name,
+                params,
+                param_types,
+                return_type,
+                body,
+                ..
+            } => {
+                // Create an async function value
+                let function_value = crate::core::Value::Function {
+                    name: name.clone(),
+                    params: params.clone(),
+                    param_types: param_types.clone(),
+                    return_type: return_type.clone(),
+                    body: body.clone(),
+                };
+                self.evaluator.define_variable(name.clone(), function_value);
+                Ok(())
+            }
+            Stmt::Class {
+                name,
+                superclass,
+                methods,
+            } => {
+                // Create a class object with methods
+                let mut class_obj = std::collections::HashMap::new();
+
+                // Store superclass if any
+                if let Some(parent) = superclass {
+                    class_obj.insert(
+                        "__superclass__".to_string(),
+                        crate::core::Value::String(parent.clone()),
+                    );
+                }
+
+                // Store methods as function values
+                for method in methods {
+                    let method_value = crate::core::Value::Function {
+                        name: method.name.clone(),
+                        params: method.params.clone(),
+                        param_types: method.param_types.clone(),
+                        return_type: method.return_type.clone(),
+                        body: method.body.clone(),
+                    };
+                    class_obj.insert(method.name.clone(), method_value);
+                }
+
+                self.evaluator
+                    .define_variable(name.clone(), crate::core::Value::Object(class_obj));
                 Ok(())
             }
         }
@@ -411,6 +468,13 @@ impl Interpreter {
                                 self.type_to_string(element_type)
                             ),
                             found: format!("{} ({})", val.type_name(), val),
+                            context: Some(format!(
+                                "array element type checking at index {}",
+                                index
+                            )),
+                            line: None,
+                            column: None,
+                            hint: None,
                         });
                     }
                 }
@@ -430,6 +494,13 @@ impl Interpreter {
                                         self.type_to_string(prop_type)
                                     ),
                                     found: format!("{} ({})", val.type_name(), val),
+                                    context: Some(format!(
+                                        "object property '{}' type checking",
+                                        prop_name
+                                    )),
+                                    line: None,
+                                    column: None,
+                                    hint: None,
                                 });
                             }
                         }
@@ -440,6 +511,10 @@ impl Interpreter {
                                     context, prop_name
                                 ),
                                 found: "missing property".to_string(),
+                                context: Some(format!("missing required property '{}'", prop_name)),
+                                line: None,
+                                column: None,
+                                hint: None,
                             });
                         }
                     }
@@ -458,11 +533,19 @@ impl Interpreter {
                 Err(crate::core::InfraError::TypeError {
                     expected: format!("{} to be of type {}", context, type_strings.join(" | ")),
                     found: format!("{} ({})", value.type_name(), value),
+                    context: Some("union type checking".to_string()),
+                    line: None,
+                    column: None,
+                    hint: None,
                 })
             }
             (_, Type::Never) => Err(crate::core::InfraError::TypeError {
                 expected: format!("{} to be of type never (impossible)", context),
                 found: format!("{} ({})", value.type_name(), value),
+                context: Some("never type checking".to_string()),
+                line: None,
+                column: None,
+                hint: None,
             }),
             _ => Err(crate::core::InfraError::TypeError {
                 expected: format!(
@@ -471,6 +554,10 @@ impl Interpreter {
                     self.type_to_string(expected_type)
                 ),
                 found: format!("{} ({})", value.type_name(), value),
+                context: Some("type compatibility checking".to_string()),
+                line: None,
+                column: None,
+                hint: None,
             }),
         }
     }

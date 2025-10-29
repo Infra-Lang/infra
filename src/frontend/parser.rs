@@ -62,6 +62,8 @@ impl Parser {
                                 message: "Invalid assignment target".to_string(),
                                 line: self.peek().line,
                                 column: self.peek().column,
+                                source_code: None,
+                                hint: None,
                             })
                         }
                     };
@@ -550,6 +552,8 @@ impl Parser {
                 message: "Expected 'function' or 'let' after 'export'".to_string(),
                 line: self.peek().line,
                 column: self.peek().column,
+                source_code: None,
+                hint: None,
             }),
         }
     }
@@ -687,7 +691,7 @@ impl Parser {
             self.peek().token_type,
             TokenType::Bang | TokenType::Minus | TokenType::Await | TokenType::New
         ) {
-            let operator = match self.advance().token_type {
+            let _operator = match self.advance().token_type {
                 TokenType::Bang => {
                     let operand = self.unary()?;
                     return Ok(Expr::Unary {
@@ -718,6 +722,8 @@ impl Parser {
                             message: "Expected '(' after 'new' expression".to_string(),
                             line: self.peek().line,
                             column: self.peek().column,
+                            source_code: None,
+                            hint: None,
                         });
                     }
 
@@ -1101,6 +1107,8 @@ impl Parser {
             message: message.to_string(),
             line: token.line,
             column: token.column,
+            source_code: None,
+            hint: None,
         })
     }
 }

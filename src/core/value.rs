@@ -19,7 +19,7 @@ pub enum Value {
         body: Box<Stmt>,
     },
     Promise {
-        value: Option<Value>,
+        value: Option<Box<Value>>,
         resolved: bool,
         rejected: bool,
         error: Option<String>,
@@ -51,6 +51,11 @@ impl PartialEq for Value {
                 // We don't compare bodies for simplicity
                 n1 == n2 && p1 == p2
             }
+            (Value::Promise { .. }, Value::Promise { .. }) => {
+                // Promises are equal only if they are the same instance
+                // For simplicity, we'll say they're never equal
+                false
+            }
             _ => false,
         }
     }
@@ -79,6 +84,7 @@ impl Value {
             Value::Array(arr) => !arr.is_empty(),
             Value::Object(obj) => !obj.is_empty(),
             Value::Function { .. } => true, // Functions are always truthy
+            Value::Promise { resolved, .. } => *resolved, // Promises are truthy if resolved
         }
     }
 
@@ -184,6 +190,24 @@ impl fmt::Display for Value {
             Value::Function { name, params, .. } => {
                 write!(f, "<function {}({})>", name, params.join(", "))
             }
+            Value::Promise {
+                resolved,
+                rejected,
+                error,
+                ..
+            } => {
+                if *rejected {
+                    write!(
+                        f,
+                        "<Promise rejected: {}>",
+                        error.as_deref().unwrap_or("unknown error")
+                    )
+                } else if *resolved {
+                    write!(f, "<Promise resolved>")
+                } else {
+                    write!(f, "<Promise pending>")
+                }
+            }
         }
     }
 }
@@ -200,6 +224,10 @@ impl Add for Value {
             (a, b) => Err(crate::core::error::InfraError::TypeError {
                 expected: "number or string".to_string(),
                 found: format!("{} + {}", a.type_name(), b.type_name()),
+                context: Some("addition operation".to_string()),
+                line: None,
+                column: None,
+                hint: None,
             }),
         }
     }
@@ -214,6 +242,10 @@ impl Sub for Value {
             (a, b) => Err(crate::core::error::InfraError::TypeError {
                 expected: "number".to_string(),
                 found: format!("{} - {}", a.type_name(), b.type_name()),
+                context: Some("subtraction operation".to_string()),
+                line: None,
+                column: None,
+                hint: None,
             }),
         }
     }
@@ -228,6 +260,10 @@ impl Mul for Value {
             (a, b) => Err(crate::core::error::InfraError::TypeError {
                 expected: "number".to_string(),
                 found: format!("{} * {}", a.type_name(), b.type_name()),
+                context: Some("multiplication operation".to_string()),
+                line: None,
+                column: None,
+                hint: None,
             }),
         }
     }
@@ -240,7 +276,10 @@ impl Div for Value {
         match (self, other) {
             (Value::Number(a), Value::Number(b)) => {
                 if b == 0.0 {
-                    Err(crate::core::error::InfraError::DivisionByZero)
+                    Err(crate::core::error::InfraError::DivisionByZero {
+                        line: None,
+                        column: None,
+                    })
                 } else {
                     Ok(Value::Number(a / b))
                 }
@@ -248,6 +287,10 @@ impl Div for Value {
             (a, b) => Err(crate::core::error::InfraError::TypeError {
                 expected: "number".to_string(),
                 found: format!("{} / {}", a.type_name(), b.type_name()),
+                context: Some("division operation".to_string()),
+                line: None,
+                column: None,
+                hint: None,
             }),
         }
     }
@@ -260,7 +303,10 @@ impl Rem for Value {
         match (self, other) {
             (Value::Number(a), Value::Number(b)) => {
                 if b == 0.0 {
-                    Err(crate::core::error::InfraError::DivisionByZero)
+                    Err(crate::core::error::InfraError::DivisionByZero {
+                        line: None,
+                        column: None,
+                    })
                 } else {
                     Ok(Value::Number(a % b))
                 }
@@ -268,6 +314,10 @@ impl Rem for Value {
             (a, b) => Err(crate::core::error::InfraError::TypeError {
                 expected: "number".to_string(),
                 found: format!("{} % {}", a.type_name(), b.type_name()),
+                context: Some("modulo operation".to_string()),
+                line: None,
+                column: None,
+                hint: None,
             }),
         }
     }

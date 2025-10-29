@@ -56,6 +56,9 @@ impl Environment {
         } else {
             Err(InfraError::UndefinedVariable {
                 name: name.to_string(),
+                line: None,
+                column: None,
+                suggestion: None,
             })
         }
     }
@@ -69,6 +72,9 @@ impl Environment {
         } else {
             Err(InfraError::UndefinedVariable {
                 name: name.to_string(),
+                line: None,
+                column: None,
+                suggestion: None,
             })
         }
     }
@@ -84,7 +90,7 @@ impl Environment {
             let stored_type = self.types.get(name).cloned();
 
             // Perform type checking if needed
-            check_fn(&value, stored_type.as_ref())?;
+            check_fn(&value, stored_type.as_ref().and_then(|t| t.as_ref()))?;
 
             self.variables.insert(name.to_string(), value);
             Ok(())
@@ -93,6 +99,9 @@ impl Environment {
         } else {
             Err(InfraError::UndefinedVariable {
                 name: name.to_string(),
+                line: None,
+                column: None,
+                suggestion: None,
             })
         }
     }

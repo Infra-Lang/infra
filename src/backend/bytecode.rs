@@ -169,13 +169,21 @@ impl Compiler {
                         } else {
                             return Err(crate::core::error::InfraError::UndefinedVariable {
                                 name: name.clone(),
+                                line: None,
+                                column: None,
+                                suggestion: None,
                             });
                         }
                     }
                     _ => {
-                        return Err(crate::core::error::InfraError::Runtime(
-                            "Complex assignment targets not yet supported in bytecode".to_string(),
-                        ));
+                        return Err(crate::core::error::InfraError::RuntimeError {
+                            message: "Complex assignment targets not yet supported in bytecode"
+                                .to_string(),
+                            line: None,
+                            column: None,
+                            stack_trace: vec![],
+                            source_code: None,
+                        });
                     }
                 }
             }
@@ -195,9 +203,7 @@ impl Compiler {
                 }
                 self.chunk.emit(OpCode::Return, 0);
             }
-            Stmt::Function {
-                name, params, body, ..
-            } => {
+            Stmt::Function { name, .. } => {
                 // For now, compile function as a placeholder
                 // In a full implementation, we'd compile the function body separately
                 let func_name_const = self.chunk.add_constant(Value::String(name.clone()));
@@ -205,9 +211,7 @@ impl Compiler {
                 // Placeholder: push function as a value
                 // TODO: Implement proper function compilation
             }
-            Stmt::AsyncFunction {
-                name, params, body, ..
-            } => {
+            Stmt::AsyncFunction { name, .. } => {
                 // Compile async function similarly to regular function
                 let func_name_const = self.chunk.add_constant(Value::String(name.clone()));
                 self.chunk.emit(OpCode::LoadConst(func_name_const), 0);
@@ -216,10 +220,13 @@ impl Compiler {
             }
 
             _ => {
-                return Err(crate::core::error::InfraError::Runtime(format!(
-                    "Statement type not yet supported in bytecode: {:?}",
-                    stmt
-                )));
+                return Err(crate::core::error::InfraError::RuntimeError {
+                    message: format!("Statement type not yet supported in bytecode: {:?}", stmt),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
+                });
             }
         }
 
@@ -239,6 +246,9 @@ impl Compiler {
                 } else {
                     return Err(crate::core::error::InfraError::UndefinedVariable {
                         name: name.clone(),
+                        line: None,
+                        column: None,
+                        suggestion: None,
                     });
                 }
             }
@@ -299,10 +309,13 @@ impl Compiler {
             }
 
             _ => {
-                return Err(crate::core::error::InfraError::Runtime(format!(
-                    "Expression type not yet supported in bytecode: {:?}",
-                    expr
-                )));
+                return Err(crate::core::error::InfraError::RuntimeError {
+                    message: format!("Expression type not yet supported in bytecode: {:?}", expr),
+                    line: None,
+                    column: None,
+                    stack_trace: vec![],
+                    source_code: None,
+                });
             }
         }
 

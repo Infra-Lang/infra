@@ -154,7 +154,7 @@ impl fmt::Display for InfraError {
                 expected,
                 found,
                 context,
-                line,
+                line: _,
                 column: _,
                 hint,
             } => {

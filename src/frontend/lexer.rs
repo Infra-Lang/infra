@@ -235,6 +235,7 @@ impl Lexer {
             "this" => TokenType::This,
             "super" => TokenType::Super,
             "init" => TokenType::Init,
+            "new" => TokenType::New,
             // Type keywords
             "number" => TokenType::NumberType,
             "string" => TokenType::StringType,
@@ -321,6 +322,7 @@ impl Lexer {
             message: message.to_string(),
             line: self.start_line,
             column: self.start_column,
+            source_code: None,
         })
     }
 }
