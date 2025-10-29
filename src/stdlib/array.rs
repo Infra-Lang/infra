@@ -1,6 +1,7 @@
 use crate::core::{InfraError, Result, Value};
 
 /// Get array length
+#[allow(dead_code)]
 pub fn length(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -25,6 +26,7 @@ pub fn length(args: &[Value]) -> Result<Value> {
 }
 
 /// Push element to array (returns new array)
+#[allow(dead_code)]
 pub fn push(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -53,6 +55,7 @@ pub fn push(args: &[Value]) -> Result<Value> {
 }
 
 /// Pop last element from array (returns new array)
+#[allow(dead_code)]
 pub fn pop(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -91,6 +94,7 @@ pub fn pop(args: &[Value]) -> Result<Value> {
 }
 
 /// Sort array (only works with arrays of numbers or strings)
+#[allow(dead_code)]
 pub fn sort(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -165,6 +169,7 @@ pub fn sort(args: &[Value]) -> Result<Value> {
 }
 
 /// Reverse array
+#[allow(dead_code)]
 pub fn reverse(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -193,6 +198,7 @@ pub fn reverse(args: &[Value]) -> Result<Value> {
 }
 
 /// Join array elements into a string
+#[allow(dead_code)]
 pub fn join(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -242,6 +248,7 @@ pub fn join(args: &[Value]) -> Result<Value> {
 /// Syntax: array.map(arr, function)
 /// Note: Since we can't pass functions as values yet, this is a placeholder
 /// for when function values are implemented
+#[allow(dead_code)]
 pub fn map(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -282,6 +289,7 @@ pub fn map(args: &[Value]) -> Result<Value> {
 
 /// Filter array elements based on a condition
 /// For now, filters numbers greater than the second argument
+#[allow(dead_code)]
 pub fn filter(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -317,6 +325,7 @@ pub fn filter(args: &[Value]) -> Result<Value> {
 }
 
 /// Reduce array to a single value (sum for numbers)
+#[allow(dead_code)]
 pub fn reduce(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -365,6 +374,7 @@ pub fn reduce(args: &[Value]) -> Result<Value> {
 
 /// Find first element matching a condition
 /// For now, finds first number greater than the second argument
+#[allow(dead_code)]
 pub fn find(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -399,6 +409,7 @@ pub fn find(args: &[Value]) -> Result<Value> {
 }
 
 /// Check if array contains a specific element
+#[allow(dead_code)]
 pub fn contains(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -434,6 +445,7 @@ pub fn contains(args: &[Value]) -> Result<Value> {
 }
 
 /// Get the first element of an array
+#[allow(dead_code)]
 pub fn first(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -464,6 +476,7 @@ pub fn first(args: &[Value]) -> Result<Value> {
 }
 
 /// Get the last element of an array
+#[allow(dead_code)]
 pub fn last(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {

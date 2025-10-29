@@ -2,8 +2,10 @@ use crate::backend::bytecode::{Chunk, OpCode};
 use crate::core::{error::InfraError, Value};
 use std::collections::HashMap;
 
+#[allow(dead_code)]
 const STACK_MAX: usize = 256;
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct VM {
     chunk: Option<Chunk>,
@@ -17,6 +19,7 @@ pub struct VM {
     event_loop: EventLoop,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct AsyncState {
     pub is_async: bool,
@@ -26,6 +29,7 @@ pub struct AsyncState {
     pub awaiting: bool,
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct EventLoop {
     promises: Vec<Promise>,
@@ -34,6 +38,7 @@ pub struct EventLoop {
     timers: Vec<Timer>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Promise {
     pub id: usize,
@@ -44,6 +49,7 @@ pub struct Promise {
     pub callbacks: Vec<Value>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Task {
     pub id: usize,
@@ -54,12 +60,14 @@ pub struct Task {
     pub awaiting_promise: Option<usize>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct MicroTask {
     pub callback: Value,
     pub value: Value,
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Timer {
     pub id: usize,

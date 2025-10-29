@@ -1,6 +1,7 @@
 use crate::core::{InfraError, Result, Value};
 
 /// Square root function
+#[allow(dead_code)]
 pub fn sqrt(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -37,6 +38,7 @@ pub fn sqrt(args: &[Value]) -> Result<Value> {
 }
 
 /// Absolute value function
+#[allow(dead_code)]
 pub fn abs(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -61,6 +63,7 @@ pub fn abs(args: &[Value]) -> Result<Value> {
 }
 
 /// Maximum of two numbers
+#[allow(dead_code)]
 pub fn max(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -85,6 +88,7 @@ pub fn max(args: &[Value]) -> Result<Value> {
 }
 
 /// Minimum of two numbers
+#[allow(dead_code)]
 pub fn min(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -109,6 +113,7 @@ pub fn min(args: &[Value]) -> Result<Value> {
 }
 
 /// Power function (base^exponent)
+#[allow(dead_code)]
 pub fn pow(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -133,6 +138,7 @@ pub fn pow(args: &[Value]) -> Result<Value> {
 }
 
 /// Floor function
+#[allow(dead_code)]
 pub fn floor(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -157,6 +163,7 @@ pub fn floor(args: &[Value]) -> Result<Value> {
 }
 
 /// Ceiling function
+#[allow(dead_code)]
 pub fn ceil(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -181,6 +188,7 @@ pub fn ceil(args: &[Value]) -> Result<Value> {
 }
 
 /// Round function
+#[allow(dead_code)]
 pub fn round(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {

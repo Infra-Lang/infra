@@ -2,6 +2,7 @@ use crate::core::{InfraError, Result, Value};
 use std::fs;
 
 /// Read file contents as string
+#[allow(dead_code)]
 pub fn read_file(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -33,6 +34,7 @@ pub fn read_file(args: &[Value]) -> Result<Value> {
 }
 
 /// Write string content to file
+#[allow(dead_code)]
 pub fn write_file(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -64,6 +66,7 @@ pub fn write_file(args: &[Value]) -> Result<Value> {
 }
 
 /// Check if file exists
+#[allow(dead_code)]
 pub fn exists(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -88,6 +91,7 @@ pub fn exists(args: &[Value]) -> Result<Value> {
 }
 
 /// Throw an exception that can be caught by try/catch
+#[allow(dead_code)]
 pub fn throw_exception(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {

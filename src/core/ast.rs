@@ -14,7 +14,8 @@ pub enum Type {
     },
     Union(Vec<Type>), // Union types: number | string
     Any,              // For untyped variables
-    Never,            // Bottom type (for functions that never return)
+    #[allow(dead_code)]
+    Never, // Bottom type (for functions that never return)
 }
 
 #[derive(Debug, Clone)]

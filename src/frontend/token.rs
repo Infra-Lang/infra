@@ -79,6 +79,7 @@ pub enum TokenType {
 }
 
 impl TokenType {
+    #[allow(dead_code)]
     pub fn is_literal(&self) -> bool {
         matches!(
             self,
@@ -90,6 +91,7 @@ impl TokenType {
         )
     }
 
+    #[allow(dead_code)]
     pub fn is_keyword(&self) -> bool {
         matches!(
             self,
@@ -124,6 +126,7 @@ impl TokenType {
         )
     }
 
+    #[allow(dead_code)]
     pub fn is_operator(&self) -> bool {
         matches!(
             self,
@@ -146,6 +149,7 @@ impl TokenType {
         )
     }
 
+    #[allow(dead_code)]
     pub fn to_literal_value(&self) -> Option<Value> {
         match self {
             TokenType::Number(n) => Some(Value::Number(*n)),
@@ -163,6 +167,7 @@ pub struct Token {
     pub token_type: TokenType,
     pub line: usize,
     pub column: usize,
+    #[allow(dead_code)]
     pub lexeme: String,
 }
 

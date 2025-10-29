@@ -1,6 +1,7 @@
 use crate::core::{InfraError, Result, Value};
 
 /// Get string length
+#[allow(dead_code)]
 pub fn length(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -25,6 +26,7 @@ pub fn length(args: &[Value]) -> Result<Value> {
 }
 
 /// Split string by delimiter
+#[allow(dead_code)]
 pub fn split(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -55,6 +57,7 @@ pub fn split(args: &[Value]) -> Result<Value> {
 }
 
 /// Join array of strings with delimiter
+#[allow(dead_code)]
 pub fn join(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -99,6 +102,7 @@ pub fn join(args: &[Value]) -> Result<Value> {
 }
 
 /// Convert string to uppercase
+#[allow(dead_code)]
 pub fn upper(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -123,6 +127,7 @@ pub fn upper(args: &[Value]) -> Result<Value> {
 }
 
 /// Convert string to lowercase
+#[allow(dead_code)]
 pub fn lower(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -147,6 +152,7 @@ pub fn lower(args: &[Value]) -> Result<Value> {
 }
 
 /// Trim whitespace from string
+#[allow(dead_code)]
 pub fn trim(args: &[Value]) -> Result<Value> {
     if args.len() != 1 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -171,6 +177,7 @@ pub fn trim(args: &[Value]) -> Result<Value> {
 }
 
 /// Check if string contains substring
+#[allow(dead_code)]
 pub fn contains(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -197,6 +204,7 @@ pub fn contains(args: &[Value]) -> Result<Value> {
 }
 
 /// Get substring from start index to end index
+#[allow(dead_code)]
 pub fn substring(args: &[Value]) -> Result<Value> {
     if args.len() != 3 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -241,6 +249,7 @@ pub fn substring(args: &[Value]) -> Result<Value> {
 }
 
 /// Replace occurrences of a substring with another string
+#[allow(dead_code)]
 pub fn replace(args: &[Value]) -> Result<Value> {
     if args.len() != 3 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -272,6 +281,7 @@ pub fn replace(args: &[Value]) -> Result<Value> {
 }
 
 /// Check if string starts with a prefix
+#[allow(dead_code)]
 pub fn starts_with(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -298,6 +308,7 @@ pub fn starts_with(args: &[Value]) -> Result<Value> {
 }
 
 /// Check if string ends with a suffix
+#[allow(dead_code)]
 pub fn ends_with(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -322,6 +333,7 @@ pub fn ends_with(args: &[Value]) -> Result<Value> {
 }
 
 /// Repeat a string n times
+#[allow(dead_code)]
 pub fn repeat(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -359,6 +371,7 @@ pub fn repeat(args: &[Value]) -> Result<Value> {
 }
 
 /// Pad string to a certain length with spaces on the left
+#[allow(dead_code)]
 pub fn pad_left(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {
@@ -401,6 +414,7 @@ pub fn pad_left(args: &[Value]) -> Result<Value> {
 }
 
 /// Pad string to a certain length with spaces on the right
+#[allow(dead_code)]
 pub fn pad_right(args: &[Value]) -> Result<Value> {
     if args.len() != 2 {
         return Err(InfraError::ArgumentCountMismatch {

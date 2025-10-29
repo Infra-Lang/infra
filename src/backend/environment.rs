@@ -28,9 +28,7 @@ impl Environment {
     pub fn define(&mut self, name: String, value: Value) {
         self.variables.insert(name.clone(), value);
         // Infer and store type for untyped variables
-        if !self.types.contains_key(&name) {
-            self.types.insert(name, None); // None means no explicit type annotation
-        }
+        self.types.entry(name).or_insert(None); // None means no explicit type annotation
     }
 
     pub fn define_with_type(&mut self, name: String, value: Value, type_annotation: Option<Type>) {
@@ -63,6 +61,7 @@ impl Environment {
         }
     }
 
+    #[allow(dead_code)]
     pub fn assign(&mut self, name: &str, value: Value) -> Result<()> {
         if self.variables.contains_key(name) {
             self.variables.insert(name.to_string(), value);
@@ -79,6 +78,7 @@ impl Environment {
         }
     }
 
+    #[allow(dead_code)]
     pub fn assign_with_type_check(
         &mut self,
         name: &str,
@@ -106,11 +106,12 @@ impl Environment {
         }
     }
 
+    #[allow(dead_code)]
     pub fn contains(&self, name: &str) -> bool {
-        self.variables.contains_key(name)
-            || self.parent.as_ref().map_or(false, |p| p.contains(name))
+        self.variables.contains_key(name) || self.parent.as_ref().is_some_and(|p| p.contains(name))
     }
 
+    #[allow(dead_code)]
     pub fn clear(&mut self) {
         self.variables.clear();
     }
@@ -120,6 +121,7 @@ impl Environment {
         self.variables.len() + parent_size
     }
 
+    #[allow(dead_code)]
     pub fn debug_vars(&self) -> Vec<String> {
         self.variables.keys().cloned().collect()
     }

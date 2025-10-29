@@ -5,6 +5,7 @@ use crate::core::{
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
+#[allow(dead_code)]
 pub enum OpCode {
     // Stack operations
     LoadConst(usize), // Load constant from constant pool
@@ -64,6 +65,7 @@ pub enum OpCode {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct Chunk {
     pub code: Vec<OpCode>,
     pub constants: Vec<Value>,
@@ -114,6 +116,7 @@ impl Chunk {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct Compiler {
     chunk: Chunk,
     locals: HashMap<String, usize>,
