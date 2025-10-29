@@ -17,6 +17,10 @@ on:
         default: "true"
         type: boolean
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   test:
     name: Run Tests
@@ -314,6 +318,7 @@ EOF
         with:
           files: release-assets/*
           name: Infra v${{ steps.version.outputs.version }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           body: |
             # Infra Programming Language v${{ steps.version.outputs.version }}
 
@@ -452,5 +457,4 @@ EOF
         uses: softprops/action-gh-release@v1
         with:
           files: release-assets/checksums.txt
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
