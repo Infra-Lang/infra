@@ -1,24 +1,30 @@
 use std::env;
 use std::process;
 
-mod core;
-mod frontend;
 mod backend;
+
 mod cli;
-mod utils;
+
+mod core;
+
+mod frontend;
+
 mod stdlib;
 
-use cli::{Runner, Repl};
+mod utils;
+
+use cli::{Repl, Runner};
+
 use utils::{version_info, ErrorReporter};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    
+
     if args.len() < 2 {
         show_usage(&args[0]);
         process::exit(1);
     }
-    
+
     match args[1].as_str() {
         "--repl" | "-r" => {
             run_repl();
@@ -38,7 +44,7 @@ fn main() {
 fn run_file(filename: &str) {
     let mut runner = Runner::new();
     let mut error_reporter = ErrorReporter::new();
-    
+
     if let Err(err) = runner.run_file(filename) {
         error_reporter.report_error(&err);
         process::exit(1);
@@ -66,7 +72,10 @@ fn show_help(program_name: &str) {
     println!();
     println!("Examples:");
     println!("  {} program.infra     # Run a file", program_name);
-    println!("  {} --repl            # Start interactive mode", program_name);
+    println!(
+        "  {} --repl            # Start interactive mode",
+        program_name
+    );
     println!();
     println!("For more information, visit: https://github.com/infra-lang/infra");
 }

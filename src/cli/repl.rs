@@ -1,5 +1,6 @@
-use std::io::{self, Write};
 use crate::cli::Runner;
+
+use std::io::{self, Write};
 
 pub struct Repl {
     runner: Runner,
@@ -26,7 +27,7 @@ impl Repl {
             match io::stdin().read_line(&mut input) {
                 Ok(_) => {
                     let input = input.trim();
-                    
+
                     if input.is_empty() {
                         continue;
                     }
@@ -84,7 +85,7 @@ impl Repl {
     fn show_environment(&self) {
         let env = self.runner.get_interpreter().get_environment();
         let size = env.size();
-        
+
         if size == 0 {
             println!("Environment is empty (no variables defined)");
         } else {
