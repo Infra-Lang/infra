@@ -112,7 +112,7 @@
       </Component>
 
       <!-- Documentation component -->
-      <Component Id="Documentation" Guid="*">
+      <Component Id="Documentation" Guid="A1C2D3E4-F5G6-7890-ABCD-EF1234567893">
         <File Id="ReadmeFile" Source="README.md" />
         <File Id="LicenseFile" Source="LICENSE" />
       </Component>
