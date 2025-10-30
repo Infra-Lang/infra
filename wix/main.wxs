@@ -34,7 +34,6 @@
                 Id="PythonDirSearch"
                 Root="HKLM"
                 Key="SOFTWARE\Python\PythonCore\3.12\InstallPath"
-                Name=""
                 Type="directory"
             />
       <RegistrySearch
@@ -186,51 +185,59 @@
     </DirectoryRef>
 
     <!-- File association component -->
-    <Component Id="FileAssociation" Guid="*">
-        <Condition><![CDATA[ASSOCIATE_FILES = "1"]]></Condition>
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="FileAssociation" Guid="*">
+          <Condition><![CDATA[ASSOCIATE_FILES = "1"]]></Condition>
 
-        <RegistryKey Root="HKCR" Key=".if" Action="createAndRemoveOnUninstall">
+          <RegistryKey
+                    Root="HKCR"
+                    Key=".if"
+                    ForceCreateOnInstall="yes"
+                    ForceDeleteOnUninstall="yes"
+                >
             <RegistryValue Type="string" Value="Infra.File" />
             <RegistryValue
-                    Name="Content Type"
-                    Type="string"
-                    Value="text/plain"
-                />
+                        Name="Content Type"
+                        Type="string"
+                        Value="text/plain"
+                    />
             <RegistryValue Name="PerceivedType" Type="string" Value="text" />
         </RegistryKey>
 
         <RegistryKey
-                Root="HKCR"
-                Key="Infra.File"
-                Action="createAndRemoveOnUninstall"
-            >
+                    Root="HKCR"
+                    Key="Infra.File"
+                    ForceCreateOnInstall="yes"
+                    ForceDeleteOnUninstall="yes"
+                >
             <RegistryValue Type="string" Value="Infra Source File" />
             <RegistryKey Key="DefaultIcon">
                 <RegistryValue Type="string" Value="[#InfraExe],0" />
             </RegistryKey>
             <RegistryKey Key="shell\open\command">
                 <RegistryValue
-                        Type="string"
-                        Value="&quot;[#InfraExe]&quot; &quot;%1&quot;"
-                    />
+                            Type="string"
+                            Value="&quot;[#InfraExe]&quot; &quot;%1&quot;"
+                        />
             </RegistryKey>
             <RegistryKey Key="shell\edit\command">
                 <RegistryValue
-                        Type="string"
-                        Value="notepad.exe &quot;%1&quot;"
-                    />
+                            Type="string"
+                            Value="notepad.exe &quot;%1&quot;"
+                        />
             </RegistryKey>
         </RegistryKey>
 
         <RegistryKey
-                Root="HKLM"
-                Key="SOFTWARE\Infra-Lang\Infra"
-                ForceCreateOnInstall="yes"
-                ForceDeleteOnUninstall="yes"
-            >
+                    Root="HKLM"
+                    Key="SOFTWARE\Infra-Lang\Infra"
+                    ForceCreateOnInstall="yes"
+                    ForceDeleteOnUninstall="yes"
+                >
             <RegistryValue Type="integer" Name="AssociatedFiles" Value="1" />
         </RegistryKey>
-    </Component>
+      </Component>
+    </DirectoryRef>
 
     <!-- Enhanced feature tree -->
     <Feature
