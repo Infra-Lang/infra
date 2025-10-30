@@ -2,20 +2,20 @@ name: Auto Release on Push
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
     inputs:
       version_bump:
-        description: 'Version bump type'
+        description: "Version bump type"
         required: true
-        default: 'patch'
+        default: "patch"
         type: choice
         options:
-        - patch
-        - minor
-        - major
+          - patch
+          - minor
+          - major
       force_release:
-        description: 'Force release even if no version changes'
+        description: "Force release even if no version changes"
         required: false
         default: false
         type: boolean
@@ -93,7 +93,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: "3.x"
 
       - name: Configure Git
         run: |
@@ -297,82 +297,82 @@ jobs:
           draft: false
           prerelease: false
           tag_name: v${{ steps.version.outputs.version }}
+          body: |
+            # Infra Programming Language v${{ steps.version.outputs.version }}
+
+            🚀 **Automated Release** - This release was automatically created when code was pushed to the main branch.
+
+            ## 📦 Installation
+
+            ### Windows (Recommended)
+            Download `infra-${{ steps.version.outputs.version }}.msi` for a professional installer with:
+            - Automatic PATH setup
+            - Start Menu shortcuts
+            - File associations for `.if` files
+            - Clean uninstallation
+            - System integration
+
+            ### Windows (Advanced)
+            Download `infra-windows.zip` for portable installation
+
+            ### Linux
+            Download `infra-linux.tar.gz` and extract:
+            ```bash
+            tar -xzf infra-linux.tar.gz
+            cd release
+            sudo cp infra /usr/local/bin/
+            ```
+
+            ### macOS
+            Download `infra-macos.tar.gz` and extract:
+            ```bash
+            tar -xzf infra-macos.tar.gz
+            cd release
+            sudo cp infra /usr/local/bin/
+            ```
+
+            ## ✨ Features
+
+            - 🎯 **Clean Syntax**: Python-like, readable and intuitive
+            - 🔧 **Optional Static Typing**: Type safety when you need it, flexibility when you don't
+            - 🏗️ **Object-Oriented Programming**: Classes, inheritance, methods, constructors
+            - ⚡ **Async/Await**: Modern asynchronous programming with event loop
+            - 📚 **Rich Standard Library**: Math, String, Array, I/O, HTTP, JSON operations
+            - 🛠️ **Professional Tooling**: CLI, REPL, enhanced error handling
+            - 📖 **Comprehensive Documentation**: Complete guides and API reference
+
+            ## 🚀 Quick Start
+
+            Create a file `hello.if`:
+            ```infra
+            let name = "World"
+            print(f"Hello, {name}!")
+            ```
+
+            Run it:
+            ```bash
+            infra hello.if
+            # Or use REPL
+            infra --repl
+            ```
+
+            ## 📚 Documentation
+
+            - [Language Guide](https://github.com/Infra-Lang/infra/blob/main/docs/LANGUAGE_GUIDE.md)
+            - [Standard Library Reference](https://github.com/Infra-Lang/infra/blob/main/docs/STANDARD_LIBRARY.md)
+            - [Installation Guide](https://github.com/Infra-Lang/infra/blob/main/docs/INSTALLATION.md)
+            - [Async/Await Programming](https://github.com/Infra-Lang/infra/blob/main/docs/ASYNC_AWAIT.md)
+
+            ## 🔐 Verification
+
+            All release assets have been verified and checksummed. See `checksums.txt` for SHA256 hashes.
+
+            ---
+            **Ready to build with Infra? 🚀**
+
+            Verify installation:
+            ```bash
+            infra --version
+            ```
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        body: |
-          # Infra Programming Language v${{ steps.version.outputs.version }}
-
-          🚀 **Automated Release** - This release was automatically created when code was pushed to the main branch.
-
-          ## 📦 Installation
-
-          ### Windows (Recommended)
-          Download `infra-${{ steps.version.outputs.version }}.msi` for a professional installer with:
-          - Automatic PATH setup
-          - Start Menu shortcuts
-          - File associations for `.if` files
-          - Clean uninstallation
-          - System integration
-
-          ### Windows (Advanced)
-          Download `infra-windows.zip` for portable installation
-
-          ### Linux
-          Download `infra-linux.tar.gz` and extract:
-          ```bash
-          tar -xzf infra-linux.tar.gz
-          cd release
-          sudo cp infra /usr/local/bin/
-          ```
-
-          ### macOS
-          Download `infra-macos.tar.gz` and extract:
-          ```bash
-          tar -xzf infra-macos.tar.gz
-          cd release
-          sudo cp infra /usr/local/bin/
-          ```
-
-          ## ✨ Features
-
-          - 🎯 **Clean Syntax**: Python-like, readable and intuitive
-          - 🔧 **Optional Static Typing**: Type safety when you need it, flexibility when you don't
-          - 🏗️ **Object-Oriented Programming**: Classes, inheritance, methods, constructors
-          - ⚡ **Async/Await**: Modern asynchronous programming with event loop
-          - 📚 **Rich Standard Library**: Math, String, Array, I/O, HTTP, JSON operations
-          - 🛠️ **Professional Tooling**: CLI, REPL, enhanced error handling
-          - 📖 **Comprehensive Documentation**: Complete guides and API reference
-
-          ## 🚀 Quick Start
-
-          Create a file `hello.if`:
-          ```infra
-          let name = "World"
-          print(f"Hello, {name}!")
-          ```
-
-          Run it:
-          ```bash
-          infra hello.if
-          # Or use REPL
-          infra --repl
-          ```
-
-          ## 📚 Documentation
-
-          - [Language Guide](https://github.com/Infra-Lang/infra/blob/main/docs/LANGUAGE_GUIDE.md)
-          - [Standard Library Reference](https://github.com/Infra-Lang/infra/blob/main/docs/STANDARD_LIBRARY.md)
-          - [Installation Guide](https://github.com/Infra-Lang/infra/blob/main/docs/INSTALLATION.md)
-          - [Async/Await Programming](https://github.com/Infra-Lang/infra/blob/main/docs/ASYNC_AWAIT.md)
-
-          ## 🔐 Verification
-
-          All release assets have been verified and checksummed. See `checksums.txt` for SHA256 hashes.
-
-          ---
-          **Ready to build with Infra? 🚀**
-
-          Verify installation:
-          ```bash
-          infra --version
-          ```
