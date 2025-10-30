@@ -326,7 +326,7 @@
         />
 
     <!-- Icon definition -->
-    <Icon Id="InfraIcon.exe" SourceFile="infra.exe" />
+    <Icon Id="InfraIcon.exe" SourceFile="PackageFiles/infra.exe" />
     <Property Id="ARPPRODUCTICON" Value="InfraIcon.exe" />
 
   </Product>
