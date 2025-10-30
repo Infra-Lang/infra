@@ -20,7 +20,7 @@
 
     <!-- Python-style upgrade handling -->
     <MajorUpgrade
-            Schedule="afterInstallUpgrade"
+            Schedule="afterInstall"
             DowngradeErrorMessage="A newer version of Infra is already installed."
             AllowSameVersionUpgrades="yes"
         />
