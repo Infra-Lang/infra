@@ -155,12 +155,14 @@ jobs:
 
       - name: Install WIX Toolset (Windows)
         if: matrix.os == 'windows-latest'
+        shell: bash
         run: |
           choco install wixtoolset -y
           echo "C:\Program Files (x86)\WiX Toolset v3.11\bin" >> $GITHUB_PATH
 
       - name: Install cargo-wix
         if: matrix.os == 'windows-latest'
+        shell: bash
         run: cargo install cargo-wix
 
       - name: Get version from Cargo.toml
@@ -194,15 +196,16 @@ jobs:
 
       - name: Copy binary (Windows)
         if: matrix.os == 'windows-latest'
-        shell: powershell
+        shell: bash
         run: |
-          New-Item -ItemType Directory -Path "release" -Force
-          Copy-Item "target\${{ matrix.target }}\release\${{ matrix.binary }}" "release\${{ matrix.binary }}" -ErrorAction SilentlyContinue
-          if (Test-Path "install.ps1") { Copy-Item "install.ps1" "release\" -ErrorAction SilentlyContinue }
-          if (Test-Path "README.md") { Copy-Item "README.md" "release\" -ErrorAction SilentlyContinue }
+          mkdir -p release
+          cp "target/${{ matrix.target }}/release/${{ matrix.binary }}" "release/${{ matrix.binary }}" || echo "Binary copy failed"
+          if [ -f "install.ps1" ]; then cp "install.ps1" "release/" || echo "install.ps1 copy failed"; fi
+          if [ -f "README.md" ]; then cp "README.md" "release/" || echo "README.md copy failed"; fi
 
       - name: Copy binary (Unix)
         if: matrix.os != 'windows-latest'
+        shell: bash
         run: |
           mkdir -p release
           cp target/${{ matrix.target }}/release/${{ matrix.binary }} release/ || echo "Binary copy failed"
@@ -213,14 +216,15 @@ jobs:
 
       - name: Create ZIP archive (Windows)
         if: matrix.os == 'windows-latest'
-        shell: powershell
+        shell: bash
         run: |
-          Set-Location -Path "release"
+          cd release
           7z a "../${{ matrix.artifact_name }}.zip" * || echo "ZIP creation failed"
-          Set-Location -Path ".."
+          cd ..
 
       - name: Create TAR archive (Unix)
         if: matrix.os != 'windows-latest'
+        shell: bash
         run: |
           cd release
           tar -czf ../${{ matrix.artifact_name }}.tar.gz * || echo "TAR creation failed"
