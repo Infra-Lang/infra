@@ -10,7 +10,7 @@
     >
 
     <Package
-            InstallerVersion="200"
+            InstallerVersion="500"
             Compressed="yes"
             InstallScope="perMachine"
             Description="Infra Programming Language Installer"
@@ -20,9 +20,7 @@
 
     <!-- Python-style upgrade handling -->
     <MajorUpgrade
-            Schedule="afterInstall"
             DowngradeErrorMessage="A newer version of Infra is already installed."
-            AllowSameVersionUpgrades="yes"
         />
 
     <MediaTemplate EmbedCab="yes" />
