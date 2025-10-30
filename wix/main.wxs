@@ -64,29 +64,11 @@
                 Id="MainExecutable"
                 Guid="12345678-1234-5678-9ABC-123456789ABC"
             >
-        <File Id="InfraExe" Source="$(var.CargoTargetBinDir)/infra.exe" />
-
-        <!-- Registry entry for installation path -->
-        <RegistryKey
-                    Root="HKLM"
-                    Key="SOFTWARE\Infra-Lang\Infra"
-                    ForceCreateOnInstall="yes"
-                    ForceDeleteOnUninstall="yes"
-                >
-          <RegistryValue
-                        Type="string"
-                        Name="InstallPath"
-                        Value="[INSTALLFOLDER]"
-                    />
-          <RegistryValue Type="string" Name="Version" Value="1.0.0" />
-          <RegistryValue Type="integer" Name="AssociatedFiles" Value="1" />
-          <RegistryValue
-                        Type="integer"
-                        Name="MainExecutableInstalled"
-                        Value="1"
-                        KeyPath="yes"
-                    />
-        </RegistryKey>
+        <File
+                    Id="InfraExe"
+                    Source="$(var.CargoTargetBinDir)/infra.exe"
+                    KeyPath="yes"
+                />
 
         <!-- REPL shortcut (created conditionally) -->
         <Shortcut
@@ -162,79 +144,16 @@
         </RegistryKey>
       </Component>
 
-      <!-- PATH environment variable component -->
-      <Component Id="PathVariable" Guid="87654321-4321-4321-4321-CBA987654321">
-        <Condition><![CDATA[ADD_TO_PATH = "1"]]></Condition>
-        <Environment
-                    Id="PATH"
-                    Name="PATH"
-                    Value="[INSTALLFOLDER]"
-                    Permanent="no"
-                    Part="last"
-                    Action="set"
-                    System="yes"
-                />
-        <RegistryValue
-                    Root="HKLM"
-                    Key="SOFTWARE\Infra-Lang\Infra"
-                    Name="AddedToPathSystem"
-                    Type="integer"
-                    Value="1"
-                    KeyPath="yes"
-                />
-      </Component>
+
 
       <!-- Documentation component -->
       <Component Id="Documentation" Guid="DEADBEEF-DEAD-BEEF-DEAD-DEADBEEFDEAD">
         <File Id="ReadmeFile" Source="README.md" />
-        <File Id="LicenseFile" Source="LICENSE" />
-
-        <!-- Documentation shortcut (created conditionally) -->
-        <Shortcut
-                    Id="InfraDocsShortcut"
-                    Directory="ApplicationProgramsFolder"
-                    Name="Infra Documentation"
-                    Description="Infra Programming Language Documentation"
-                    Target="[#ReadmeFile]"
-                    Icon="InfraIcon.exe"
-                />
-
-        <Condition><![CDATA[CREATE_SHORTCUTS = "1"]]></Condition>
-        <RegistryValue
-                    Root="HKCU"
-                    Key="Software\Infra-Lang\Infra"
-                    Name="docs_shortcut"
-                    Type="integer"
-                    Value="1"
-                />
-        <RegistryValue
-                    Root="HKCU"
-                    Key="Software\Infra-Lang\Infra"
-                    Name="DocumentationInstalled"
-                    Type="integer"
-                    Value="1"
-                    KeyPath="yes"
-                />
+        <File Id="LicenseFile" Source="LICENSE" KeyPath="yes" />
       </Component>
     </DirectoryRef>
 
-    <!-- Application Program Folder cleanup -->
-    <Component
-            Id="ApplicationProgramsCleanup"
-            Guid="ABCDEF12-3456-7890-ABCD-EF1234567890"
-            Directory="ApplicationProgramsFolder"
-        >
-        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" />
-        <Condition><![CDATA[CREATE_SHORTCUTS = "1"]]></Condition>
-        <RegistryValue
-                Root="HKCU"
-                Key="Software\Infra-Lang\Infra"
-                Name="shortcuts_created"
-                Type="integer"
-                Value="1"
-                KeyPath="yes"
-            />
-    </Component>
+
 
 
 
@@ -260,14 +179,7 @@
             <ComponentRef Id="MainExecutable" />
         </Feature>
 
-        <Feature
-                Id="PathFeature"
-                Title="Add Infra to PATH"
-                Description="Add Infra to the system PATH environment variable for command-line access."
-                Level="1"
-            >
-            <ComponentRef Id="PathVariable" />
-        </Feature>
+
 
         <Feature
                 Id="DocumentationFeature"
@@ -276,7 +188,6 @@
                 Level="1"
             >
             <ComponentRef Id="Documentation" />
-            <ComponentRef Id="ApplicationProgramsCleanup" />
         </Feature>
 
         <!-- Shortcuts are now part of MainExecutable and Documentation components -->
