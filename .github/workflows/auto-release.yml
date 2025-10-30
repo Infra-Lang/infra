@@ -39,6 +39,7 @@ jobs:
 
       - name: Check for changes
         id: changes
+        shell: bash
         run: |
           # Get the last tag
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
@@ -164,12 +165,14 @@ jobs:
 
       - name: Get version from Cargo.toml
         id: version
+        shell: bash
         run: |
           VERSION=$(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Release version: $VERSION"
 
       - name: Build optimized binary
+        shell: bash
         run: |
           cargo build --release --target ${{ matrix.target }}
           if [ "${{ matrix.os }}" != "windows-latest" ]; then
@@ -186,6 +189,7 @@ jobs:
           fi
 
       - name: Create release directory
+        shell: bash
         run: mkdir -p release
 
       - name: Copy binary (Windows)
@@ -224,10 +228,12 @@ jobs:
 
       - name: Build MSI Installer (Windows)
         if: matrix.os == 'windows-latest'
+        shell: bash
         run: |
           cargo wix --nocapture -v --install-version ${{ steps.version.outputs.version }}
 
       - name: Verify archives
+        shell: bash
         run: |
           echo "Archive size:"
           ls -lh *.${{ matrix.ext }}
@@ -257,6 +263,7 @@ jobs:
 
       - name: Get version from Cargo.toml
         id: version
+        shell: bash
         run: |
           VERSION=$(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
@@ -268,6 +275,7 @@ jobs:
           path: artifacts
 
       - name: Prepare release assets
+        shell: bash
         run: |
           mkdir -p release-assets
           cp artifacts/*/*.zip release-assets/ 2>/dev/null || true
@@ -283,6 +291,7 @@ jobs:
           ls -la release-assets/
 
       - name: Generate checksums
+        shell: bash
         run: |
           cd release-assets
           sha256sum * > checksums.txt
