@@ -1,0 +1,98 @@
+{
+  "name": "infra-language",
+  "displayName": "Infra Language",
+  "description": "Syntax highlighting and language support for the Infra programming language",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Linters"
+  ],
+  "activationEvents": [
+    "onLanguage:infra"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "infra",
+        "aliases": [
+          "Infra",
+          "infra"
+        ],
+        "extensions": [
+          ".if"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "infra",
+        "scopeName": "source.infra",
+        "path": "./syntaxes/infra.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "infra",
+        "path": "./snippets/infra.json"
+      }
+    ],
+    "configuration": {
+      "title": "Infra",
+      "properties": {
+        "infra.lsp.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Infra Language Server"
+        },
+        "infra.lsp.path": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the Infra Language Server executable"
+        },
+        "infra.formatting.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable code formatting for Infra files"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "18.x",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1",
+    "vscode-languageserver": "^9.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Infra-Lang/infra"
+  },
+  "keywords": [
+    "infra",
+    "programming-language",
+    "syntax-highlighting",
+    "language-server"
+  ],
+  "author": "Infra-Lang Contributors",
+  "license": "MIT"
+}

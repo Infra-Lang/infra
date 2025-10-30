@@ -1,0 +1,243 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "infra",
+  "scopeName": "source.infra",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#regex"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#types"
+    },
+    {
+      "include": "#functions"
+    },
+    {
+      "include": "#variables"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#punctuation"
+    },
+    {
+      "include": "#numbers"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash",
+          "begin": "//",
+          "end": "$"
+        },
+        {
+          "name": "comment.block",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.infra",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.infra",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.infra",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.infra",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.other.infra",
+          "begin": "f\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.infra",
+              "match": "\\\\."
+            },
+            {
+              "name": "constant.character.format.infra",
+              "match": "\\{[^}]*\\}",
+              "inside": {
+                "content": {
+                  "name": "source.infra.embedded"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.raw.infra",
+          "begin": "r\"",
+          "end": "\""
+        }
+      ]
+    },
+    "regex": {
+      "patterns": [
+        {
+          "name": "string.regexp.infra",
+          "begin": "/",
+          "end": "/[gimsuy]*",
+          "patterns": [
+            {
+              "name": "constant.character.escape.infra",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.infra",
+          "match": "\\b(function|class|if|else|elif|for|while|return|break|continue|import|export|from|as|in|is|not|and|or|await|async|yield|try|catch|finally|throw|raise|assert|with|match|case)\\b"
+        },
+        {
+          "name": "storage.type.infra",
+          "match": "\\b(let|const|var|static|public|private|protected|readonly|abstract|final|override|virtual|interface|enum|struct|union|type)\\b"
+        },
+        {
+          "name": "keyword.operator.word.infra",
+          "match": "\\b(and|or|not|in|is|instanceof|typeof|new|delete|void|null|undefined|true|false)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "support.type.builtin.infra",
+          "match": "\\b(number|string|boolean|array|object|function|void|null|undefined|any|never|unknown|symbol|bigint)\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "support.function.builtin.infra",
+          "match": "\\b(print|println|len|abs|max|min|round|floor|ceil|sqrt|pow|log|exp|sin|cos|tan|asin|acos|atan|random|type|str|int|float|bool|array|object|keys|values|items|enumerate|zip|map|filter|reduce|sorted|reversed|sum|any|all)\\b(?=\\s*\\()"
+        }
+      ]
+    },
+    "variables": {
+      "patterns": [
+        {
+          "name": "variable.language.infra",
+          "match": "\\b(self|super|this|arguments|module|exports|require|global|window|document|console|process)\\b"
+        },
+        {
+          "name": "variable.other.constant.infra",
+          "match": "\\b[A-Z_][A-Z0-9_]*\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.assignment.infra",
+          "match": "="
+        },
+        {
+          "name": "keyword.operator.arithmetic.infra",
+          "match": "\\+|-|\\*|/|%|\\*\\*|//"
+        },
+        {
+          "name": "keyword.operator.comparison.infra",
+          "match": "==|!=|===|!==|<|<=|>|>="
+        },
+        {
+          "name": "keyword.operator.logical.infra",
+          "match": "&&|\\|\\||!"
+        },
+        {
+          "name": "keyword.operator.bitwise.infra",
+          "match": "&|\\||\\^|~|<<|>>|>>>"
+        },
+        {
+          "name": "keyword.operator.ternary.infra",
+          "match": "\\?|:"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.separator.comma.infra",
+          "match": ","
+        },
+        {
+          "name": "punctuation.separator.dot.infra",
+          "match": "\\."
+        },
+        {
+          "name": "punctuation.separator.colon.infra",
+          "match": ":"
+        },
+        {
+          "name": "punctuation.terminator.statement.infra",
+          "match": ";"
+        },
+        {
+          "name": "punctuation.bracket.curly.infra",
+          "match": "[{}]"
+        },
+        {
+          "name": "punctuation.bracket.square.infra",
+          "match": "[\\[\\]]"
+        },
+        {
+          "name": "punctuation.bracket.round.infra",
+          "match": "[()]"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.infra",
+          "match": "\\b0[xX][0-9a-fA-F]+\\b"
+        },
+        {
+          "name": "constant.numeric.infra",
+          "match": "\\b0[bB][01]+\\b"
+        },
+        {
+          "name": "constant.numeric.infra",
+          "match": "\\b0[oO][0-7]+\\b"
+        },
+        {
+          "name": "constant.numeric.infra",
+          "match": "\\b\\d+(\\.\\d+)?([eE][+-]?\\d+)?\\b"
+        }
+      ]
+    }
+  }
+}

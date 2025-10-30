@@ -1,0 +1,27 @@
+[package]
+name = "infra-lsp"
+version = "0.1.0"
+edition = "2021"
+description = "Language Server Protocol implementation for Infra programming language"
+authors = ["Infra-Lang Contributors"]
+license = "MIT"
+repository = "https://github.com/Infra-Lang/infra"
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tower-lsp = "0.20"
+tower = "0.4"
+dashmap = "5.5"
+async-trait = "0.1"
+clap = { version = "4.0", features = ["derive"] }
+log = "0.4"
+env_logger = "0.10"
+anyhow = "1.0"
+thiserror = "1.0"
+regex = "1.10"
+
+[dependencies.infra]
+path = "../../"
+features = ["parsing"]
