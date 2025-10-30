@@ -67,7 +67,11 @@
     <!-- Main installation components -->
     <DirectoryRef Id="INSTALLFOLDER">
       <Component Id="MainExecutable" Guid="*">
-        <File Id="InfraExe" Source="PackageFiles/infra.exe" KeyPath="yes" />
+        <File
+                    Id="InfraExe"
+                    Source="$(var.CargoTargetBinDir)/infra.exe"
+                    KeyPath="yes"
+                />
 
         <!-- Registry entry for installation path -->
         <RegistryKey
@@ -109,8 +113,8 @@
 
       <!-- Documentation component -->
       <Component Id="Documentation" Guid="*">
-        <File Id="ReadmeFile" Source="PackageFiles/README.md" />
-        <File Id="LicenseFile" Source="PackageFiles/LICENSE" />
+        <File Id="ReadmeFile" Source="README.md" />
+        <File Id="LicenseFile" Source="LICENSE" />
       </Component>
     </DirectoryRef>
 
@@ -326,7 +330,7 @@
         />
 
     <!-- Icon definition -->
-    <Icon Id="InfraIcon.exe" SourceFile="PackageFiles/infra.exe" />
+    <Icon Id="InfraIcon.exe" SourceFile="$(var.CargoTargetBinDir)/infra.exe" />
     <Property Id="ARPPRODUCTICON" Value="InfraIcon.exe" />
 
   </Product>

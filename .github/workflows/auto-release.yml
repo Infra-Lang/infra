@@ -199,18 +199,18 @@ jobs:
         shell: bash
         run: |
           mkdir -p release
-          mkdir -p "wix/PackageFiles"
           cp "target/${{ matrix.target }}/release/${{ matrix.binary }}" "release/${{ matrix.binary }}" || echo "Binary copy failed"
-          cp "target/${{ matrix.target }}/release/${{ matrix.binary }}" "wix/PackageFiles/${{ matrix.binary }}" || echo "WIX binary copy failed"
           if [ -f "install.ps1" ]; then cp "install.ps1" "release/" || echo "install.ps1 copy failed"; fi
           if [ -f "README.md" ]; then cp "README.md" "release/" || echo "README.md copy failed"; fi
           if [ -f "LICENSE" ]; then cp "LICENSE" "release/" || echo "LICENSE copy failed"; fi
-          # Copy documentation files for WIX
-          if [ -f "README.md" ]; then cp "README.md" "wix/PackageFiles/" || echo "WIX README.md copy failed"; fi
-          if [ -f "LICENSE" ]; then cp "LICENSE" "wix/PackageFiles/" || echo "WIX LICENSE copy failed"; fi
-          # Debug: Verify PackageFiles contents
-          echo "PackageFiles directory contents:"
-          ls -la wix/PackageFiles/ || echo "PackageFiles directory listing failed"
+
+      - name: Build MSI Installer (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          # Build MSI using cargo-wix with automatic file discovery
+          echo "Building MSI with cargo-wix..."
+          cargo wix --nocapture -v --install-version ${{ steps.version.outputs.version }}
 
       - name: Copy binary (Unix)
         if: matrix.os != 'windows-latest'
@@ -238,23 +238,6 @@ jobs:
           cd release
           tar -czf ../${{ matrix.artifact_name }}.tar.gz * || echo "TAR creation failed"
           cd ..
-
-      - name: Build MSI Installer (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: bash
-        run: |
-          # Ensure we're in the correct directory for MSI building
-          echo "Current working directory:"
-          pwd
-          echo "Root directory contents:"
-          ls -la
-          echo "WIX directory contents:"
-          ls -la wix/ || echo "WIX directory not found"
-          echo "PackageFiles directory contents:"
-          ls -la wix/PackageFiles/ || echo "PackageFiles directory not found"
-          echo "Binary file exists:"
-          ls -la "target/${{ matrix.target }}/release/${{ matrix.binary }}" || echo "Binary not found in target"
-          cargo wix --nocapture -v --install-version ${{ steps.version.outputs.version }}
 
       - name: Verify archives
         shell: bash
