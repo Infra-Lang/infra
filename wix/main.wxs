@@ -97,15 +97,6 @@
         <!-- CreateFolder for ApplicationProgramsFolder shortcut -->
         <CreateFolder Directory="ApplicationProgramsFolder" />
 
-        <Condition><![CDATA[CREATE_SHORTCUTS = "1"]]></Condition>
-        <RegistryValue
-                    Root="HKCU"
-                    Key="Software\Infra-Lang\Infra"
-                    Name="repl_shortcut"
-                    Type="integer"
-                    Value="1"
-                />
-
         <!-- Desktop shortcut (created conditionally) -->
         <Shortcut
                     Id="InfraDesktopShortcut"
@@ -121,17 +112,7 @@
         <!-- CreateFolder for Desktop Folder shortcut -->
         <CreateFolder Directory="DesktopFolder" />
 
-        <Condition><![CDATA[INSTALL_DESKTOP_SHORTCUT = "1"]]></Condition>
-        <RegistryValue
-                    Root="HKCU"
-                    Key="Software\Infra-Lang\Infra"
-                    Name="desktop_shortcut"
-                    Type="integer"
-                    Value="1"
-                />
-
-        <!-- File association registry entries (created conditionally) -->
-        <Condition><![CDATA[ASSOCIATE_FILES = "1"]]></Condition>
+        <!-- File association registry entries -->
 
         <!-- .if file extension registration -->
         <RegistryKey
@@ -233,7 +214,11 @@
     </DirectoryRef>
 
     <!-- Application Program Folder cleanup -->
-    <Component Id="ApplicationProgramsCleanup" Guid="*">
+    <Component
+            Id="ApplicationProgramsCleanup"
+            Guid="*"
+            Directory="ApplicationProgramsFolder"
+        >
         <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" />
         <Condition><![CDATA[CREATE_SHORTCUTS = "1"]]></Condition>
         <RegistryValue
