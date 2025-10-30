@@ -60,7 +60,10 @@
 
     <!-- Main installation components -->
     <DirectoryRef Id="INSTALLFOLDER">
-      <Component Id="MainExecutable" Guid="*">
+      <Component
+                Id="MainExecutable"
+                Guid="12345678-1234-5678-9ABC-123456789ABC"
+            >
         <File
                     Id="InfraExe"
                     Source="$(var.CargoTargetBinDir)/infra.exe"
@@ -156,19 +159,10 @@
                         />
             </RegistryKey>
         </RegistryKey>
-
-        <RegistryKey
-                    Root="HKLM"
-                    Key="SOFTWARE\Infra-Lang\Infra"
-                    ForceCreateOnInstall="yes"
-                    ForceDeleteOnUninstall="yes"
-                >
-            <RegistryValue Type="integer" Name="AssociatedFiles" Value="1" />
-        </RegistryKey>
       </Component>
 
       <!-- PATH environment variable component -->
-      <Component Id="PathVariable" Guid="*">
+      <Component Id="PathVariable" Guid="87654321-4321-4321-4321-CBA987654321">
         <Condition><![CDATA[ADD_TO_PATH = "1"]]></Condition>
         <Environment
                     Id="PATH"
@@ -210,7 +204,7 @@
     <!-- Application Program Folder cleanup -->
     <Component
             Id="ApplicationProgramsCleanup"
-            Guid="*"
+            Guid="ABCDEF12-3456-7890-ABCD-EF1234567890"
             Directory="ApplicationProgramsFolder"
         >
         <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" />
