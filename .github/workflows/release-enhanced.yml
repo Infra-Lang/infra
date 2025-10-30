@@ -300,7 +300,7 @@ jobs:
             VERSION="${{ github.ref_name }}"
             VERSION="${VERSION#v}"
           else
-            VERSION="0.1.1"
+            VERSION=$(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2)
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Release version: $VERSION"
