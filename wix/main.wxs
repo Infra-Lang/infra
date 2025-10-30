@@ -4,7 +4,7 @@
         Id="*"
         Name="Infra Programming Language"
         Language="1033"
-        Version="0.2.1"
+        Version="0.1.1"
         Manufacturer="Infra-Lang Contributors"
         UpgradeCode="A4B2C3D1-E5F6-7890-ABCD-EF1234567890"
     >
@@ -81,7 +81,7 @@
                         Name="InstallPath"
                         Value="[INSTALLFOLDER]"
                     />
-          <RegistryValue Type="string" Name="Version" Value="0.2.1" />
+          <RegistryValue Type="string" Name="Version" Value="0.1.1" />
         </RegistryKey>
       </Component>
 
