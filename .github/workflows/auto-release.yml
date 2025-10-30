@@ -246,7 +246,7 @@ jobs:
           ls -lh *.${{ matrix.ext }}
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             echo "MSI size:"
-            ls -lh target/wix/infra-*.msi || echo "MSI not found"
+            ls -lh target/wix/infra-${{ steps.version.outputs.version }}-x86_64.msi || echo "MSI not found"
           fi
 
       - name: Upload artifact
@@ -255,7 +255,7 @@ jobs:
           name: ${{ matrix.artifact_name }}
           path: |
             ${{ matrix.artifact_name }}.*
-            target/wix/infra-*.msi
+            target/wix/infra-${{ steps.version.outputs.version }}-x86_64.msi
           retention-days: 30
 
   create-release:
@@ -287,7 +287,7 @@ jobs:
           mkdir -p release-assets
           cp artifacts/*/*.zip release-assets/ 2>/dev/null || true
           cp artifacts/*/*.tar.gz release-assets/ 2>/dev/null || true
-          cp artifacts/*/target/wix/infra-*.msi release-assets/ 2>/dev/null || true
+          cp artifacts/*/target/wix/infra-${{ steps.version.outputs.version }}-x86_64.msi release-assets/ 2>/dev/null || true
 
           echo "Release assets:"
           ls -la release-assets/

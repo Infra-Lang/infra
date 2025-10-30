@@ -16,6 +16,7 @@
             Description="Infra Programming Language Installer"
             Comments="A simple, Python-like programming language built for performance and competitive programming"
             Platform="x64"
+            Manufacturer="Infra-Lang Contributors"
         />
 
     <!-- Python-style upgrade handling -->
@@ -119,7 +120,7 @@
     <!-- Python-style UI with advanced features -->
     <UIRef Id="WixUI_Mondo" />
 
-    <!-- Custom properties for better UI experience -->
+    <!-- Enhanced trust and publisher information -->
     <Property
             Id="ARPURLINFOABOUT"
             Value="https://github.com/Infra-Lang/infra"
@@ -136,6 +137,11 @@
     <Property
             Id="ARPUPDATEURL"
             Value="https://github.com/Infra-Lang/infra/releases"
+        />
+    <Property Id="ARPCONTACT" Value="ashiq@infra-lang.org" />
+    <Property
+            Id="ARPREADME"
+            Value="https://github.com/Infra-Lang/infra/blob/main/README.md"
         />
 
 
