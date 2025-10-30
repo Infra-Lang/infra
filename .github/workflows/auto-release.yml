@@ -208,6 +208,9 @@ jobs:
           # Copy documentation files for WIX
           if [ -f "README.md" ]; then cp "README.md" "wix/PackageFiles/" || echo "WIX README.md copy failed"; fi
           if [ -f "LICENSE" ]; then cp "LICENSE" "wix/PackageFiles/" || echo "WIX LICENSE copy failed"; fi
+          # Debug: Verify PackageFiles contents
+          echo "PackageFiles directory contents:"
+          ls -la wix/PackageFiles/ || echo "PackageFiles directory listing failed"
 
       - name: Copy binary (Unix)
         if: matrix.os != 'windows-latest'
@@ -240,6 +243,17 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: bash
         run: |
+          # Ensure we're in the correct directory for MSI building
+          echo "Current working directory:"
+          pwd
+          echo "Root directory contents:"
+          ls -la
+          echo "WIX directory contents:"
+          ls -la wix/ || echo "WIX directory not found"
+          echo "PackageFiles directory contents:"
+          ls -la wix/PackageFiles/ || echo "PackageFiles directory not found"
+          echo "Binary file exists:"
+          ls -la "target/${{ matrix.target }}/release/${{ matrix.binary }}" || echo "Binary not found in target"
           cargo wix --nocapture -v --install-version ${{ steps.version.outputs.version }}
 
       - name: Verify archives
