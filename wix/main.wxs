@@ -1,39 +1,49 @@
-<?xml version="1.0"?>
+<?xml version="1.0" ?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="*"
-           Name="Infra Programming Language $(var.Version)"
-           Language="1033"
-           Version="$(var.Version)"
-           Manufacturer="Infra-Lang Contributors"
-           UpgradeCode="A4B2C3D1-E5F6-7890-ABCD-EF1234567890">
+  <Product
+        Id="*"
+        Name="Infra Programming Language"
+        Language="1033"
+        Version="0.2.1"
+        Manufacturer="Infra-Lang Contributors"
+        UpgradeCode="A4B2C3D1-E5F6-7890-ABCD-EF1234567890"
+    >
 
-    <Package InstallerVersion="200"
-             Compressed="yes"
-             InstallScope="perMachine"
-             Description="Infra Programming Language Installer"
-             Comments="A simple, Python-like programming language built for performance and competitive programming"
-             Platform="x64" />
+    <Package
+            InstallerVersion="200"
+            Compressed="yes"
+            InstallScope="perMachine"
+            Description="Infra Programming Language Installer"
+            Comments="A simple, Python-like programming language built for performance and competitive programming"
+            Platform="x64"
+        />
 
     <!-- Python-style upgrade handling -->
-    <MajorUpgrade Schedule="afterInstallUpgrade"
-                  DowngradeErrorMessage="A newer version of Infra is already installed."
-                  AllowSameVersionUpgrades="yes" />
+    <MajorUpgrade
+            Schedule="afterInstallUpgrade"
+            DowngradeErrorMessage="A newer version of Infra is already installed."
+            AllowSameVersionUpgrades="yes"
+        />
 
     <MediaTemplate EmbedCab="yes" />
 
     <!-- Default installation directory like Python -->
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
     <Property Id="INSTALLFOLDER" Value="ProgramFiles64Folder">
-      <RegistrySearch Id="PythonDirSearch"
-                      Root="HKLM"
-                      Key="SOFTWARE\Python\PythonCore\3.12\InstallPath"
-                      Name=""
-                      Type="directory" />
-      <RegistrySearch Id="InfraDirSearch"
-                      Root="HKLM"
-                      Key="SOFTWARE\Infra-Lang\Infra"
-                      Name="InstallPath"
-                      Type="directory" />
+      <RegistrySearch
+                Id="PythonDirSearch"
+                Root="HKLM"
+                Key="SOFTWARE\Python\PythonCore\3.12\InstallPath"
+                Name=""
+                Type="directory"
+            />
+      <RegistrySearch
+                Id="InfraDirSearch"
+                Root="HKLM"
+                Key="SOFTWARE\Infra-Lang\Infra"
+                Name="InstallPath"
+                Type="directory"
+            />
     </Property>
 
     <!-- Custom properties for installation options -->
@@ -50,7 +60,7 @@
 
       <!-- Start Menu Programs directory -->
       <Directory Id="ProgramMenuFolder">
-        <Directory Id="ApplicationProgramsFolder" Name="Infra"/>
+        <Directory Id="ApplicationProgramsFolder" Name="Infra" />
       </Directory>
 
       <!-- Desktop directory for optional shortcut -->
@@ -60,44 +70,50 @@
     <!-- Main installation components -->
     <DirectoryRef Id="INSTALLFOLDER">
       <Component Id="MainExecutable" Guid="*">
-        <File Id="InfraExe"
-              Source="$(var.TargetDir)infra.exe"
-              KeyPath="yes" />
+        <File Id="InfraExe" Source="infra.exe" KeyPath="yes" />
 
         <!-- Registry entry for installation path -->
-        <RegistryKey Root="HKLM"
-                     Key="SOFTWARE\Infra-Lang\Infra"
-                     ForceCreateOnInstall="yes"
-                     ForceDeleteOnUninstall="yes">
-          <RegistryValue Type="string" Name="InstallPath" Value="[INSTALLFOLDER]" />
-          <RegistryValue Type="string" Name="Version" Value="$(var.Version)" />
+        <RegistryKey
+                    Root="HKLM"
+                    Key="SOFTWARE\Infra-Lang\Infra"
+                    ForceCreateOnInstall="yes"
+                    ForceDeleteOnUninstall="yes"
+                >
+          <RegistryValue
+                        Type="string"
+                        Name="InstallPath"
+                        Value="[INSTALLFOLDER]"
+                    />
+          <RegistryValue Type="string" Name="Version" Value="0.2.1" />
         </RegistryKey>
       </Component>
 
       <!-- PATH environment variable component -->
       <Component Id="PathVariable" Guid="*">
         <Condition><![CDATA[ADD_TO_PATH = "1"]]></Condition>
-        <Environment Id="PATH"
-                     Name="PATH"
-                     Value="[INSTALLFOLDER]"
-                     Permanent="no"
-                     Part="last"
-                     Action="set"
-                     System="yes" />
-        <RegistryKey Root="HKLM"
-                     Key="SOFTWARE\Infra-Lang\Infra"
-                     ForceCreateOnInstall="yes"
-                     ForceDeleteOnUninstall="yes">
+        <Environment
+                    Id="PATH"
+                    Name="PATH"
+                    Value="[INSTALLFOLDER]"
+                    Permanent="no"
+                    Part="last"
+                    Action="set"
+                    System="yes"
+                />
+        <RegistryKey
+                    Root="HKLM"
+                    Key="SOFTWARE\Infra-Lang\Infra"
+                    ForceCreateOnInstall="yes"
+                    ForceDeleteOnUninstall="yes"
+                >
           <RegistryValue Type="integer" Name="AddedToPath" Value="1" />
         </RegistryKey>
       </Component>
 
       <!-- Documentation component -->
       <Component Id="Documentation" Guid="*">
-        <File Id="ReadmeFile"
-              Source="$(var.ProjectDir)README.md" />
-        <File Id="LicenseFile"
-              Source="$(var.ProjectDir)LICENSE" />
+        <File Id="ReadmeFile" Source="README.md" />
+        <File Id="LicenseFile" Source="LICENSE" />
       </Component>
     </DirectoryRef>
 
@@ -106,34 +122,42 @@
       <Component Id="ApplicationShortcuts" Guid="*">
         <Condition><![CDATA[CREATE_SHORTCUTS = "1"]]></Condition>
 
-        <Shortcut Id="InfraREPLShortcut"
-                  Name="Infra REPL"
-                  Description="Infra Programming Language Interactive Shell"
-                  Target="[#InfraExe]"
-                  WorkingDirectory="INSTALLFOLDER"
-                  Arguments="--repl"
-                  Icon="InfraIcon.exe" />
+        <Shortcut
+                    Id="InfraREPLShortcut"
+                    Name="Infra REPL"
+                    Description="Infra Programming Language Interactive Shell"
+                    Target="[#InfraExe]"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Arguments="--repl"
+                    Icon="InfraIcon.exe"
+                />
 
-        <Shortcut Id="InfraDocsShortcut"
-                  Name="Infra Documentation"
-                  Description="Infra Programming Language Documentation"
-                  Target="[#ReadmeFile]"
-                  Icon="InfraIcon.exe" />
+        <Shortcut
+                    Id="InfraDocsShortcut"
+                    Name="Infra Documentation"
+                    Description="Infra Programming Language Documentation"
+                    Target="[#ReadmeFile]"
+                    Icon="InfraIcon.exe"
+                />
 
-        <Shortcut Id="UninstallShortcut"
-                  Name="Uninstall Infra"
-                  Description="Uninstall Infra Programming Language"
-                  Target="[SystemFolder]msiexec.exe"
-                  Arguments="/x [ProductCode]"
-                  Icon="InfraIcon.exe" />
+        <Shortcut
+                    Id="UninstallShortcut"
+                    Name="Uninstall Infra"
+                    Description="Uninstall Infra Programming Language"
+                    Target="[SystemFolder]msiexec.exe"
+                    Arguments="/x [ProductCode]"
+                    Icon="InfraIcon.exe"
+                />
 
-        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
-        <RegistryValue Root="HKCU"
-                       Key="Software\Infra-Lang\Infra"
-                       Name="shortcuts_created"
-                       Type="integer"
-                       Value="1"
-                       KeyPath="yes"/>
+        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" />
+        <RegistryValue
+                    Root="HKCU"
+                    Key="Software\Infra-Lang\Infra"
+                    Name="shortcuts_created"
+                    Type="integer"
+                    Value="1"
+                    KeyPath="yes"
+                />
       </Component>
     </DirectoryRef>
 
@@ -141,19 +165,23 @@
     <DirectoryRef Id="DesktopFolder">
       <Component Id="DesktopShortcut" Guid="*">
         <Condition><![CDATA[INSTALL_DESKTOP_SHORTCUT = "1"]]></Condition>
-        <Shortcut Id="InfraDesktopShortcut"
-                  Name="Infra REPL"
-                  Description="Infra Programming Language Interactive Shell"
-                  Target="[#InfraExe]"
-                  WorkingDirectory="INSTALLFOLDER"
-                  Arguments="--repl"
-                  Icon="InfraIcon.exe" />
-        <RegistryValue Root="HKCU"
-                       Key="Software\Infra-Lang\Infra"
-                       Name="desktop_shortcut"
-                       Type="integer"
-                       Value="1"
-                       KeyPath="yes"/>
+        <Shortcut
+                    Id="InfraDesktopShortcut"
+                    Name="Infra REPL"
+                    Description="Infra Programming Language Interactive Shell"
+                    Target="[#InfraExe]"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Arguments="--repl"
+                    Icon="InfraIcon.exe"
+                />
+        <RegistryValue
+                    Root="HKCU"
+                    Key="Software\Infra-Lang\Infra"
+                    Name="desktop_shortcut"
+                    Type="integer"
+                    Value="1"
+                    KeyPath="yes"
+                />
       </Component>
     </DirectoryRef>
 
@@ -161,85 +189,111 @@
     <Component Id="FileAssociation" Guid="*">
         <Condition><![CDATA[ASSOCIATE_FILES = "1"]]></Condition>
 
-        <RegistryKey Root="HKCR"
-                     Key=".if"
-                     Action="createAndRemoveOnUninstall">
+        <RegistryKey Root="HKCR" Key=".if" Action="createAndRemoveOnUninstall">
             <RegistryValue Type="string" Value="Infra.File" />
-            <RegistryValue Name="Content Type" Type="string" Value="text/plain" />
+            <RegistryValue
+                    Name="Content Type"
+                    Type="string"
+                    Value="text/plain"
+                />
             <RegistryValue Name="PerceivedType" Type="string" Value="text" />
         </RegistryKey>
 
-        <RegistryKey Root="HKCR"
-                     Key="Infra.File"
-                     Action="createAndRemoveOnUninstall">
+        <RegistryKey
+                Root="HKCR"
+                Key="Infra.File"
+                Action="createAndRemoveOnUninstall"
+            >
             <RegistryValue Type="string" Value="Infra Source File" />
             <RegistryKey Key="DefaultIcon">
                 <RegistryValue Type="string" Value="[#InfraExe],0" />
             </RegistryKey>
             <RegistryKey Key="shell\open\command">
-                <RegistryValue Type="string" Value="&quot;[#InfraExe]&quot; &quot;%1&quot;" />
+                <RegistryValue
+                        Type="string"
+                        Value="&quot;[#InfraExe]&quot; &quot;%1&quot;"
+                    />
             </RegistryKey>
             <RegistryKey Key="shell\edit\command">
-                <RegistryValue Type="string" Value="notepad.exe &quot;%1&quot;" />
+                <RegistryValue
+                        Type="string"
+                        Value="notepad.exe &quot;%1&quot;"
+                    />
             </RegistryKey>
         </RegistryKey>
 
-        <RegistryKey Root="HKLM"
-                     Key="SOFTWARE\Infra-Lang\Infra"
-                     ForceCreateOnInstall="yes"
-                     ForceDeleteOnUninstall="yes">
+        <RegistryKey
+                Root="HKLM"
+                Key="SOFTWARE\Infra-Lang\Infra"
+                ForceCreateOnInstall="yes"
+                ForceDeleteOnUninstall="yes"
+            >
             <RegistryValue Type="integer" Name="AssociatedFiles" Value="1" />
         </RegistryKey>
     </Component>
 
     <!-- Enhanced feature tree -->
-    <Feature Id="Complete"
-             Title="Infra Programming Language"
-             Description="The complete Infra programming language package."
-             Display="expand"
-             ConfigurableDirectory="INSTALLFOLDER"
-             Level="1">
+    <Feature
+            Id="Complete"
+            Title="Infra Programming Language"
+            Description="The complete Infra programming language package."
+            Display="expand"
+            ConfigurableDirectory="INSTALLFOLDER"
+            Level="1"
+        >
 
-        <Feature Id="MainProgram"
-                 Title="Infra Core Files"
-                 Description="Infra programming language interpreter, compiler, and core libraries."
-                 Level="1"
-                 Display="expand">
+        <Feature
+                Id="MainProgram"
+                Title="Infra Core Files"
+                Description="Infra programming language interpreter, compiler, and core libraries."
+                Level="1"
+                Display="expand"
+            >
             <ComponentRef Id="MainExecutable" />
         </Feature>
 
-        <Feature Id="PathFeature"
-                 Title="Add Infra to PATH"
-                 Description="Add Infra to the system PATH environment variable for command-line access."
-                 Level="1">
+        <Feature
+                Id="PathFeature"
+                Title="Add Infra to PATH"
+                Description="Add Infra to the system PATH environment variable for command-line access."
+                Level="1"
+            >
             <ComponentRef Id="PathVariable" />
         </Feature>
 
-        <Feature Id="DocumentationFeature"
-                 Title="Documentation"
-                 Description="README file and license information."
-                 Level="1">
+        <Feature
+                Id="DocumentationFeature"
+                Title="Documentation"
+                Description="README file and license information."
+                Level="1"
+            >
             <ComponentRef Id="Documentation" />
         </Feature>
 
-        <Feature Id="ShortcutsFeature"
-                 Title="Start Menu Shortcuts"
-                 Description="Create Start Menu shortcuts for Infra REPL and documentation."
-                 Level="1">
+        <Feature
+                Id="ShortcutsFeature"
+                Title="Start Menu Shortcuts"
+                Description="Create Start Menu shortcuts for Infra REPL and documentation."
+                Level="1"
+            >
             <ComponentRef Id="ApplicationShortcuts" />
         </Feature>
 
-        <Feature Id="FileAssociationFeature"
-                 Title="File Association"
-                 Description="Associate .if files with Infra for easy opening."
-                 Level="1">
+        <Feature
+                Id="FileAssociationFeature"
+                Title="File Association"
+                Description="Associate .if files with Infra for easy opening."
+                Level="1"
+            >
             <ComponentRef Id="FileAssociation" />
         </Feature>
 
-        <Feature Id="DesktopShortcutFeature"
-                 Title="Desktop Shortcut"
-                 Description="Create a desktop shortcut for Infra REPL."
-                 Level="1000">
+        <Feature
+                Id="DesktopShortcutFeature"
+                Title="Desktop Shortcut"
+                Description="Create a desktop shortcut for Infra REPL."
+                Level="1000"
+            >
             <ComponentRef Id="DesktopShortcut" />
         </Feature>
     </Feature>
@@ -248,14 +302,26 @@
     <UIRef Id="WixUI_Mondo" />
 
     <!-- Custom properties for better UI experience -->
-    <Property Id="ARPURLINFOABOUT" Value="https://github.com/Infra-Lang/infra" />
-    <Property Id="ARPAUTHORIZEDCDFPREFIX" Value="https://github.com/Infra-Lang/infra/releases" />
+    <Property
+            Id="ARPURLINFOABOUT"
+            Value="https://github.com/Infra-Lang/infra"
+        />
+    <Property
+            Id="ARPAUTHORIZEDCDFPREFIX"
+            Value="https://github.com/Infra-Lang/infra/releases"
+        />
     <Property Id="ARPSIZE" Value="50000" />
-    <Property Id="ARPHELPLINK" Value="https://github.com/Infra-Lang/infra/discussions" />
-    <Property Id="ARPUPDATEURL" Value="https://github.com/Infra-Lang/infra/releases" />
+    <Property
+            Id="ARPHELPLINK"
+            Value="https://github.com/Infra-Lang/infra/discussions"
+        />
+    <Property
+            Id="ARPUPDATEURL"
+            Value="https://github.com/Infra-Lang/infra/releases"
+        />
 
     <!-- Icon definition -->
-    <Icon Id="InfraIcon.exe" SourceFile="$(var.TargetDir)infra.exe" />
+    <Icon Id="InfraIcon.exe" SourceFile="infra.exe" />
     <Property Id="ARPPRODUCTICON" Value="InfraIcon.exe" />
 
   </Product>
