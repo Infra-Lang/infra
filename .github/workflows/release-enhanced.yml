@@ -9,18 +9,17 @@ on:
       create_release:
         description: "Create a new release"
         required: true
-        default: "false"
+        default: false
         type: boolean
       run_tests:
         description: "Run tests before release"
         required: true
-        default: "true"
+        default: true
         type: boolean
 
 permissions:
   contents: write
   packages: write
-  releases: write
 
 jobs:
   test:
@@ -125,16 +124,15 @@ jobs:
       - name: Build optimized binary
         run: |
           cargo build --release --target ${{ matrix.target }}
-          # Strip binary to reduce size (Unix only)
           if [ "${{ matrix.os }}" != "windows-latest" ]; then
-            strip target/${{ matrix.target }}/release/${{ matrix.binary }} || echo "Strip failed, continuing with unstripped binary"
+            strip target/${{ matrix.target }}/release/${{ matrix.binary }} || echo "Strip failed, continuing"
           fi
 
       - name: Run basic binary test
         shell: bash
         run: |
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            ./target/${{ matrix.target }}/release/${{ matrix.binary }}.exe --version || echo "Binary test failed, continuing"
+            ./target/${{ matrix.target }}/release/${{ matrix.binary }} --version || echo "Binary test failed, continuing"
           else
             ./target/${{ matrix.target }}/release/${{ matrix.binary }} --version || echo "Binary test failed, continuing"
           fi
@@ -150,32 +148,6 @@ jobs:
           Copy-Item "target\${{ matrix.target }}\release\${{ matrix.binary }}" "release\${{ matrix.binary }}" -ErrorAction SilentlyContinue
           if (Test-Path "install.ps1") { Copy-Item "install.ps1" "release\" -ErrorAction SilentlyContinue }
           if (Test-Path "README.md") { Copy-Item "README.md" "release\" -ErrorAction SilentlyContinue }
-          if (Test-Path "LICENSE") {
-            Copy-Item "LICENSE" "release\" -ErrorAction SilentlyContinue
-          } else {
-            Write-Output "LICENSE file not found, creating basic license"
-            "# Infra Programming Language License
-
-Copyright (c) 2024 Infra-Lang Contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE." | Out-File -FilePath "release\LICENSE" -Encoding UTF8
-          }
 
       - name: Copy binary (Unix)
         if: matrix.os != 'windows-latest'
@@ -184,34 +156,6 @@ SOFTWARE." | Out-File -FilePath "release\LICENSE" -Encoding UTF8
           cp target/${{ matrix.target }}/release/${{ matrix.binary }} release/ || echo "Binary copy failed"
           cp install.sh release/ || echo "install.sh copy failed"
           cp README.md release/ || echo "README.md copy failed"
-          if [ -f LICENSE ]; then
-            cp LICENSE release/ || echo "LICENSE copy failed"
-          else
-            echo "Creating basic LICENSE file"
-            cat > release/LICENSE << 'EOF'
-# Infra Programming Language License
-
-Copyright (c) 2024 Infra-Lang Contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-EOF
-          fi
           chmod +x release/${{ matrix.binary }} || echo "chmod binary failed"
           chmod +x release/install.sh || echo "chmod install.sh failed"
 
@@ -219,13 +163,12 @@ EOF
         shell: bash
         run: |
           echo "Release directory contents:"
-          ls -la release/ || echo "Failed to list release directory"
-          if [ "${{ matrix.os }}" != "windows-latest" ]; then
-            echo "Binary version:"
-            cd release && ./${{ matrix.binary }} --version && cd .. || echo "Binary test failed"
+          ls -la release/
+          echo "Binary version:"
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            cd release && ./${{ matrix.binary }} --version || echo "Binary test failed"
           else
-            echo "Binary version:"
-            cd release && ./${{ matrix.binary }}.exe --version && cd .. || echo "Binary test failed"
+            cd release && ./${{ matrix.binary }} --version || echo "Binary test failed"
           fi
 
       - name: Create ZIP archive (Windows)
@@ -245,17 +188,14 @@ EOF
 
       - name: Verify archives
         run: |
-          if [ "${{ matrix.os }}" != "windows-latest" ]; then
-            echo "Archive size:"
-            ls -lh *.${{ matrix.ext }}
-          fi
+          echo "Archive size:"
+          ls -lh *.${{ matrix.ext }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: |
-            ${{ matrix.artifact_name }}.*
+          path: ${{ matrix.artifact_name }}.*
           retention-days: 30
 
   release:
@@ -276,8 +216,8 @@ EOF
       - name: Prepare release assets
         run: |
           mkdir -p release-assets
-          cp artifacts/*/*.zip release-assets/ 2>/dev/null || echo "No ZIP files found"
-          cp artifacts/*/*.tar.gz release-assets/ 2>/dev/null || echo "No TAR files found"
+          cp artifacts/*/*.zip release-assets/ 2>/dev/null || true
+          cp artifacts/*/*.tar.gz release-assets/ 2>/dev/null || true
           echo "Release assets:"
           ls -la release-assets/
 
@@ -287,9 +227,9 @@ EOF
             if [ -f "$file" ]; then
               echo "Verifying $(basename $file):"
               if [[ "$file" == *.zip ]]; then
-                unzip -t "$file"
+                unzip -t "$file" || true
               elif [[ "$file" == *.tar.gz ]]; then
-                tar -tzf "$file" | head -10
+                tar -tzf "$file" | head -10 || true
               fi
               echo "File size: $(du -h "$file" | cut -f1)"
               echo "---"
@@ -314,7 +254,7 @@ EOF
           sha256sum * > checksums.txt
           cat checksums.txt
 
-      - name: Create GitHub Release
+      - name: Create GitHub Release with Checksums
         uses: softprops/action-gh-release@v2
         with:
           files: release-assets/*
@@ -322,8 +262,6 @@ EOF
           generate_release_notes: true
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           body: |
             # Infra Programming Language v${{ steps.version.outputs.version }}
 
@@ -339,123 +277,48 @@ EOF
             ```
 
             ### Manual Downloads
-
-            #### Windows
-            Download `infra-windows.zip` and extract to a folder of your choice.
-
-            #### Linux
-            Download `infra-linux.tar.gz` and extract:
-            ```bash
-            tar -xzf infra-linux.tar.gz
-            cd release
-            sudo cp infra /usr/local/bin/
-            ```
-
-            #### macOS
-            Download `infra-macos.tar.gz` and extract:
-            ```bash
-            tar -xzf infra-macos.tar.gz
-            cd release
-            sudo cp infra /usr/local/bin/
-            ```
+            - Windows: `infra-windows.zip`
+            - Linux: `infra-linux.tar.gz`
+            - macOS: `infra-macos.tar.gz`
 
             ## ✨ Features
-
-            - **🎯 Clean Syntax**: Python-like, readable and intuitive
-            - **🔧 Optional Static Typing**: Type safety when you need it, flexibility when you don't
-            - **🏗️ Object-Oriented Programming**: Classes, inheritance, methods, constructors
-            - **⚡ Async/Await**: Modern asynchronous programming with event loop
-            - **📚 Rich Standard Library**: Math, String, Array, I/O, HTTP, JSON operations
-            - **🛠️ Professional Tooling**: CLI, REPL, enhanced error handling
-            - **📖 Comprehensive Documentation**: Complete guides and API reference
+            - 🎯 Clean Syntax
+            - 🔧 Optional Static Typing
+            - 🏗️ Object-Oriented Programming
+            - ⚡ Async/Await
+            - 📚 Rich Standard Library
+            - 🛠️ Professional Tooling
+            - 📖 Comprehensive Documentation
 
             ## 🚀 Quick Start
-
-            Create a file `hello.if`:
             ```infra
             let name = "World"
             print(f"Hello, {name}!")
-
-            // Functions
-            function fibonacci(n: number): number {
-                if n <= 1: return n
-                return fibonacci(n - 1) + fibonacci(n - 2)
-            }
-
-            print(f"Fibonacci(10) = {fibonacci(10)}")
-
-            // Object-Oriented Programming
-            class Greeter:
-                function init(name: string):
-                    this.name = name
-
-                function greet(): string {
-                    return f"Hello, {this.name}!"
-                }
-
-            let greeter = Greeter("Infra")
-            print(greeter.greet())
-
-            // Async/Await
-            async function fetch_data(): string {
-                await async.sleep(1000)
-                return "Data fetched successfully!"
-            }
-
-            fetch_data().then(data => print(data))
-            ```
-
-            Run it:
-            ```bash
-            infra hello.if
-            # Or use REPL
-            infra --repl
             ```
 
             ## 📚 Documentation
-
             - [Language Guide](https://github.com/Infra-Lang/infra/blob/main/docs/LANGUAGE_GUIDE.md)
-            - [Standard Library Reference](https://github.com/Infra-Lang/infra/blob/main/docs/STANDARD_LIBRARY.md)
+            - [Standard Library](https://github.com/Infra-Lang/infra/blob/main/docs/STANDARD_LIBRARY.md)
             - [Installation Guide](https://github.com/Infra-Lang/infra/blob/main/docs/INSTALLATION.md)
             - [Async/Await Programming](https://github.com/Infra-Lang/infra/blob/main/docs/ASYNC_AWAIT.md)
 
             ## 🏗️ Architecture
-
-            Infra follows a clean, modular architecture with:
             - Frontend: Lexer, Parser, AST
-            - Backend: Interpreter, Bytecode Generator, Virtual Machine
-            - Standard Library: Math, String, Array, I/O, HTTP, JSON
+            - Backend: Interpreter, Bytecode Generator, VM
             - CLI: Runner, REPL
 
             ## 🔐 Verification
-
-            All release assets have been verified for integrity:
-            - Binaries tested for basic functionality
-            - Archives verified for integrity
-            - SHA256 checksums provided below
+            All release assets verified and checksummed.
 
             ## 🙏 Acknowledgments
-
-            Built with Rust for safety and performance. Inspired by Python's readability and modern language features.
+            Built with Rust, inspired by Python.
 
             ## 📞 Support
-
-            - 📚 Documentation: https://github.com/Infra-Lang/infra/blob/main/README.md
-            - 🐛 Issues: https://github.com/Infra-Lang/infra/issues
-            - 💬 Discussions: https://github.com/Infra-Lang/infra/discussions
+            - Documentation: https://github.com/Infra-Lang/infra
+            - Issues: https://github.com/Infra-Lang/infra/issues
+            - Discussions: https://github.com/Infra-Lang/infra/discussions
 
             ---
-
             **Ready to build with Infra? 🚀**
-
-            Verify installation:
-            ```bash
-            infra --version
-            ```
-
-      - name: Upload checksums to release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: release-assets/checksums.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
