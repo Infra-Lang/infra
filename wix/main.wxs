@@ -64,11 +64,7 @@
                 Id="MainExecutable"
                 Guid="12345678-1234-5678-9ABC-123456789ABC"
             >
-        <File
-                    Id="InfraExe"
-                    Source="$(var.CargoTargetBinDir)/infra.exe"
-                    KeyPath="yes"
-                />
+        <File Id="InfraExe" Source="$(var.CargoTargetBinDir)/infra.exe" />
 
         <!-- Registry entry for installation path -->
         <RegistryKey
@@ -83,8 +79,13 @@
                         Value="[INSTALLFOLDER]"
                     />
           <RegistryValue Type="string" Name="Version" Value="1.0.0" />
-          <RegistryValue Type="integer" Name="AddedToPath" Value="1" />
           <RegistryValue Type="integer" Name="AssociatedFiles" Value="1" />
+          <RegistryValue
+                        Type="integer"
+                        Name="MainExecutableInstalled"
+                        Value="1"
+                        KeyPath="yes"
+                    />
         </RegistryKey>
 
         <!-- REPL shortcut (created conditionally) -->
@@ -173,6 +174,14 @@
                     Action="set"
                     System="yes"
                 />
+        <RegistryValue
+                    Root="HKLM"
+                    Key="SOFTWARE\Infra-Lang\Infra"
+                    Name="AddedToPathSystem"
+                    Type="integer"
+                    Value="1"
+                    KeyPath="yes"
+                />
       </Component>
 
       <!-- Documentation component -->
@@ -197,6 +206,14 @@
                     Name="docs_shortcut"
                     Type="integer"
                     Value="1"
+                />
+        <RegistryValue
+                    Root="HKCU"
+                    Key="Software\Infra-Lang\Infra"
+                    Name="DocumentationInstalled"
+                    Type="integer"
+                    Value="1"
+                    KeyPath="yes"
                 />
       </Component>
     </DirectoryRef>
@@ -259,6 +276,7 @@
                 Level="1"
             >
             <ComponentRef Id="Documentation" />
+            <ComponentRef Id="ApplicationProgramsCleanup" />
         </Feature>
 
         <!-- Shortcuts are now part of MainExecutable and Documentation components -->
