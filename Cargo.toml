@@ -9,6 +9,12 @@ repository = "https://github.com/infra-lang/infra"
 keywords = ["programming-language", "interpreter", "competitive-programming"]
 categories = ["compilers"]
 
+[package.metadata.wix]
+upgrade-guid = "A4B2C3D1-E5F6-7890-ABCD-EF1234567890"
+path-guid = "B5C3D4E2-F6A7-8901-BCDE-F23456789012"
+license = false
+eula = false
+
 [[bin]]
 name = "infra"
 path = "src/main.rs"

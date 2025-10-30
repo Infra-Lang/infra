@@ -47,6 +47,16 @@ jobs:
       - name: Add target
         run: rustup target add ${{ matrix.target }}
 
+      - name: Install WIX Toolset (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install wixtoolset -y
+          echo "C:\Program Files (x86)\WiX Toolset v3.11\bin" >> $GITHUB_PATH
+
+      - name: Install cargo-wix
+        if: matrix.os == 'windows-latest'
+        run: cargo install cargo-wix
+
       - name: Build binary
         run: cargo build --release --target ${{ matrix.target }}
 
@@ -85,12 +95,17 @@ jobs:
           tar -czf ../${{ matrix.artifact_name }}.tar.gz *
           cd ..
 
+      - name: Build MSI Installer (Windows)
+        if: matrix.os == 'windows-latest'
+        run: cargo wix --nocapture -v --install-version autogen
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
           path: |
             ${{ matrix.artifact_name }}.*
+            target/wix/infra.msi
           retention-days: 30
 
   release:
@@ -113,6 +128,7 @@ jobs:
           mkdir -p release-assets
           cp artifacts/*/*.zip release-assets/ 2>/dev/null || echo
           cp artifacts/*/*.tar.gz release-assets/ 2>/dev/null || echo
+          cp artifacts/*/target/wix/infra.msi release-assets/ 2>/dev/null || echo
           ls -la release-assets/
 
       - name: Extract version from tag
