@@ -97,7 +97,7 @@ jobs:
 
       - name: Build MSI Installer (Windows)
         if: matrix.os == 'windows-latest'
-        run: cargo wix --nocapture -v --install-version autogen
+        run: cargo wix --nocapture -v --install-version 0.2.0
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
