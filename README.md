@@ -715,3 +715,13 @@ This repository now features a fully automated release system that creates new r
 5. Generates checksums and documentation
 
 Every push now creates a new release automatically! 🎉
+## 🔧 PowerShell Compatibility Fixed
+
+All Windows build steps now use bash shell for cross-platform compatibility:
+- ✅ PowerShell syntax errors resolved
+- ✅ '||' operator compatibility fixed  
+- ✅ Cross-platform commands implemented
+- ✅ ZIP creation working on Windows
+- ✅ MSI building with proper shell syntax
+
+The automated release system should now work flawlessly on all platforms!
