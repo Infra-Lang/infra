@@ -745,3 +745,12 @@ All WIX compilation issues have been fixed:
 - ✅ Modern WIX syntax implemented
 
 The MSI installer should now build successfully in the automated release system!
+## 🔧 WIX Schema Validation Error Fixed
+
+All WIX schema validation issues have been resolved:
+- ✅ Fixed invalid Schedule attribute in MajorUpgrade element
+- ✅ Replaced 'afterInstallUpgrade' with valid 'afterInstall' value
+- ✅ Resolved CNDL0107 schema validation error
+- ✅ Ensured WIX compliance with proper schema attributes
+
+The MSI installer should now build successfully without any schema validation errors!
