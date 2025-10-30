@@ -37,11 +37,7 @@
             />
     </Property>
 
-    <!-- Custom properties for installation options -->
-    <Property Id="ADD_TO_PATH" Value="1" />
-    <Property Id="CREATE_SHORTCUTS" Value="1" />
-    <Property Id="ASSOCIATE_FILES" Value="1" />
-    <Property Id="INSTALL_DESKTOP_SHORTCUT" Value="0" />
+
 
     <!-- Installation directory structure -->
     <Directory Id="TARGETDIR" Name="SourceDir">
@@ -49,13 +45,9 @@
         <Directory Id="INSTALLFOLDER" Name="Infra" />
       </Directory>
 
-      <!-- Start Menu Programs directory -->
-      <Directory Id="ProgramMenuFolder">
-        <Directory Id="ApplicationProgramsFolder" Name="Infra" />
-      </Directory>
 
-      <!-- Desktop directory for optional shortcut -->
-      <Directory Id="DesktopFolder" Name="Desktop" />
+
+
     </Directory>
 
     <!-- Main installation components -->
@@ -69,79 +61,6 @@
                     Source="$(var.CargoTargetBinDir)/infra.exe"
                     KeyPath="yes"
                 />
-
-        <!-- REPL shortcut (created conditionally) -->
-        <Shortcut
-                    Id="InfraREPLShortcut"
-                    Directory="ApplicationProgramsFolder"
-                    Name="Infra REPL"
-                    Description="Infra Programming Language Interactive Shell"
-                    Target="[#InfraExe]"
-                    WorkingDirectory="INSTALLFOLDER"
-                    Arguments="--repl"
-                    Icon="InfraIcon.exe"
-                />
-
-        <!-- CreateFolder for ApplicationProgramsFolder shortcut -->
-        <CreateFolder Directory="ApplicationProgramsFolder" />
-
-        <!-- Desktop shortcut (created conditionally) -->
-        <Shortcut
-                    Id="InfraDesktopShortcut"
-                    Directory="DesktopFolder"
-                    Name="Infra REPL"
-                    Description="Infra Programming Language Interactive Shell"
-                    Target="[#InfraExe]"
-                    WorkingDirectory="INSTALLFOLDER"
-                    Arguments="--repl"
-                    Icon="InfraIcon.exe"
-                />
-
-        <!-- CreateFolder for Desktop Folder shortcut -->
-        <CreateFolder Directory="DesktopFolder" />
-
-        <!-- File association registry entries -->
-
-        <!-- .if file extension registration -->
-        <RegistryKey
-                    Root="HKCR"
-                    Key=".if"
-                    ForceCreateOnInstall="yes"
-                    ForceDeleteOnUninstall="yes"
-                >
-            <RegistryValue Type="string" Value="Infra.File" />
-            <RegistryValue
-                        Name="Content Type"
-                        Type="string"
-                        Value="text/plain"
-                    />
-            <RegistryValue Name="PerceivedType" Type="string" Value="text" />
-        </RegistryKey>
-
-        <!-- Infra.File registration -->
-        <RegistryKey
-                    Root="HKCR"
-                    Key="Infra.File"
-                    ForceCreateOnInstall="yes"
-                    ForceDeleteOnUninstall="yes"
-                >
-            <RegistryValue Type="string" Value="Infra Source File" />
-            <RegistryKey Key="DefaultIcon">
-                <RegistryValue Type="string" Value="[#InfraExe],0" />
-            </RegistryKey>
-            <RegistryKey Key="shell\open\command">
-                <RegistryValue
-                            Type="string"
-                            Value="&quot;[#InfraExe]&quot; &quot;%1&quot;"
-                        />
-            </RegistryKey>
-            <RegistryKey Key="shell\edit\command">
-                <RegistryValue
-                            Type="string"
-                            Value="notepad.exe &quot;%1&quot;"
-                        />
-            </RegistryKey>
-        </RegistryKey>
       </Component>
 
 
@@ -219,9 +138,7 @@
             Value="https://github.com/Infra-Lang/infra/releases"
         />
 
-    <!-- Icon definition -->
-    <Icon Id="InfraIcon.exe" SourceFile="$(var.CargoTargetBinDir)/infra.exe" />
-    <Property Id="ARPPRODUCTICON" Value="InfraIcon.exe" />
+
 
   </Product>
 </Wix>
