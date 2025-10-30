@@ -207,6 +207,23 @@ jobs:
           if (Test-Path "target/wix/infra.msi") {
             Write-Output "MSI created successfully"
             Get-Item target/wix/infra.msi | Select-Object Name, Length
+
+            # Test MSI installation
+            Write-Output "Testing MSI installation..."
+            Start-Process msiexec -ArgumentList "/i", "target/wix/infra.msi", "/quiet", "/norestart", "/lv", "install.log" -Wait
+
+            # Verify installation
+            if (Get-Command "infra" -ErrorAction SilentlyContinue) {
+              Write-Output "Infra successfully installed and available in PATH"
+              infra --version
+            } else {
+              Write-Warning "Infra command not found in PATH after installation"
+            }
+
+            # Test uninstallation
+            Write-Output "Testing MSI uninstallation..."
+            Start-Process msiexec -ArgumentList "/x", "target/wix/infra.msi", "/quiet", "/norestart", "/lv", "uninstall.log" -Wait
+
           } else {
             Write-Error "MSI creation failed"
             exit 1
